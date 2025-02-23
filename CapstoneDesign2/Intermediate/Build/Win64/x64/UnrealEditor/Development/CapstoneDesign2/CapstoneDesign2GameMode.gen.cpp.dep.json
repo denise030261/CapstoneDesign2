@@ -1,0 +1,19 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\intermediate\\build\\win64\\unrealeditor\\inc\\capstonedesign2\\uht\\capstonedesign2gamemode.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\intermediate\\build\\win64\\x64\\capstonedesign2editor\\development\\unrealed\\sharedpch.unrealed.project.valapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\capstonedesign2\\definitions.capstonedesign2.h",
+            "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\source\\capstonedesign2\\capstonedesign2gamemode.h",
+            "d:\\epic games\\ue_5.4\\engine\\source\\runtime\\engine\\classes\\gameframework\\gamemodebase.h",
+            "d:\\epic games\\ue_5.4\\engine\\source\\runtime\\engine\\classes\\engine\\serverstatreplicator.h",
+            "d:\\epic games\\ue_5.4\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\serverstatreplicator.generated.h",
+            "d:\\epic games\\ue_5.4\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\gamemodebase.generated.h",
+            "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\intermediate\\build\\win64\\unrealeditor\\inc\\capstonedesign2\\uht\\capstonedesign2gamemode.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

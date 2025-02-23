@@ -1,0 +1,17 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-CapstoneDesign2.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\CapstoneDesign2Editor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.h.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\CapstoneDesign2.init.gen.cpp.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\CapstoneDesign2Character.gen.cpp.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\CapstoneDesign2GameMode.gen.cpp.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\CapstoneDesign2.cpp.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\CapstoneDesign2Character.cpp.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\CapstoneDesign2GameMode.cpp.obj"
+"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\Default.rc2.res"
+/OUT:"C:\Users\admin\Documents\GitHub\CapstoneDesign2\CapstoneDesign2\Intermediate\Build\Win64\x64\UnrealEditor\Development\CapstoneDesign2\UnrealEditor-CapstoneDesign2.lib"

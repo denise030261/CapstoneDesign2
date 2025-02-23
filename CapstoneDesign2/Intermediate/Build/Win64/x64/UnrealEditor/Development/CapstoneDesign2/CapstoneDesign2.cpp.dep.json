@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\source\\capstonedesign2\\capstonedesign2.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\intermediate\\build\\win64\\x64\\capstonedesign2editor\\development\\unrealed\\sharedpch.unrealed.project.valapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\capstonedesign2\\definitions.capstonedesign2.h",
+            "c:\\users\\admin\\documents\\github\\capstonedesign2\\capstonedesign2\\source\\capstonedesign2\\capstonedesign2.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
