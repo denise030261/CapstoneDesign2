@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "CapstoneDesign2Character.h"
+
+#include "MainCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,16 +12,15 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
-DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
 // ACapstoneDesign2Character
 
-ACapstoneDesign2Character::ACapstoneDesign2Character()
+AMainCharacter::AMainCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -54,16 +54,24 @@ ACapstoneDesign2Character::ACapstoneDesign2Character()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-void ACapstoneDesign2Character::BeginPlay()
+void AMainCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	AnimInst = GetMesh()->GetAnimInstance();
+	if (AnimInst)
+	{
+		AnimInst->OnPlayMontageNotifyBegin.AddDynamic(this, &AMainCharacter::HandleOnMontageNotifyComponent);
+		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
+		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcComboMontage);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Input
 
-void ACapstoneDesign2Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -73,27 +81,27 @@ void ACapstoneDesign2Character::SetupPlayerInputComponent(UInputComponent* Playe
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
+
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACapstoneDesign2Character::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACapstoneDesign2Character::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
+
+		// Attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMainCharacter::Attack);
 	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
+
 }
 
-void ACapstoneDesign2Character::Move(const FInputActionValue& Value)
+void AMainCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -106,7 +114,7 @@ void ACapstoneDesign2Character::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -116,7 +124,7 @@ void ACapstoneDesign2Character::Move(const FInputActionValue& Value)
 	}
 }
 
-void ACapstoneDesign2Character::Look(const FInputActionValue& Value)
+void AMainCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -128,3 +136,48 @@ void ACapstoneDesign2Character::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
+void AMainCharacter::Attack(const FInputActionValue& Value)
+{
+	if (AnimInst && !bAttack)
+	{
+		bAttack = true;
+		AnimInst->Montage_Play(AttakcComboMontage);
+
+		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
+		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcComboMontage);
+	}
+	else
+	{
+		AttackComboIndex = 1;
+	}
+}
+
+void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPayload)
+{
+	if (CameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
+	}
+	AttackComboIndex--;
+
+	if (AttackComboIndex < 0)
+	{
+		if (AnimInst)
+		{
+			bAttack = false;
+			AttackComboIndex = 0;
+			AnimInst->Montage_Stop(0.4f, AttakcComboMontage);
+		}
+	}
+}
+
+void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == AttakcComboMontage)
+	{
+		bAttack = false;
+		AttackComboIndex = 0;
+	}
+}
+
