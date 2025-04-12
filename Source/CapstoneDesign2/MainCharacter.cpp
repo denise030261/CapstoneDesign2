@@ -11,6 +11,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "D:/Epic Games/UE_5.4/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -142,6 +144,7 @@ void AMainCharacter::Attack(const FInputActionValue& Value)
 	if (AnimInst && !bAttack)
 	{
 		bAttack = true;
+		ThrowTalisman();
 		AnimInst->Montage_Play(AttakcComboMontage);
 
 		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
@@ -154,7 +157,7 @@ void AMainCharacter::Attack(const FInputActionValue& Value)
 }
 
 void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPayload)
-{
+{ 
 	if (CameraShakeClass)
 	{
 		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
@@ -170,6 +173,9 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 			AnimInst->Montage_Stop(0.4f, AttakcComboMontage);
 		}
 	}
+
+	if (NotifyName == "Spawn")
+		ThrowTalisman();
 }
 
 void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -178,6 +184,47 @@ void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	{
 		bAttack = false;
 		AttackComboIndex = 0;
+	}
+}
+
+void AMainCharacter::ThrowTalisman()
+{
+	FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
+	FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	FVector ThrowLocation = GetActorLocation() + ForwardDirection * 200;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ATalisman* TalismanInstance = GetWorld()->SpawnActor<ATalisman>(Talisman, ThrowLocation, YawRotation, SpawnParams);
+	TalismanInstance->SetMoveDistance(ThrowLocation + ForwardDirection * TalismanInstance->TalismanDataAsset->SkillInfo.Distance);
+
+	if (Talisman && TalismanInstance->TalismanDataAsset && TalismanInstance->TalismanDataAsset->SkillInfo.Skill)
+	{
+		UTalismanSkillStrategy* Executor = NewObject<UTalismanSkillStrategy>(
+			Talisman,
+			TalismanInstance->TalismanDataAsset->SkillInfo.Skill
+		);
+
+		if (Executor)
+		{
+			Executor->SkillExecute(TalismanInstance);  
+		}
+	}
+
+	FRotator RotateRotation(0, -85, 0);
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+		TalismanInstance->TalismanDataAsset->SkillInfo.Effect,
+		TalismanInstance->GetRootComponent(),   // 부모 컴포넌트
+		NAME_None,                              // 소켓 이름 (필요 없으면 None)
+		FVector::ZeroVector,                    // 상대 위치
+		RotateRotation,                 // 상대 회전
+		EAttachLocation::KeepRelativeOffset,   // 상대 위치 유지
+		true                                    // AutoDestroy
+	);
+
+	if (!NiagaraComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn and attach Niagara effect"));
 	}
 }
 
