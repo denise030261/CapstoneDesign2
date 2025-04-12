@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Talisman/Talisman.h"
 #include "MainCharacter.generated.h"
 
 class USpringArmComponent;
@@ -67,6 +68,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<ATalisman> Talisman;
+
 protected:
 
 	/** Called for movement input */
@@ -93,6 +97,9 @@ protected:
 	bool bMovement;
 
 private:
+	UFUNCTION()
+	void ThrowTalisman();
+
 	// Comboing
 	int32 AttackComboIndex = 0;
 
