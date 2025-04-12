@@ -11,7 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "D:/Epic Games/UE_5.4/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+#include "NiagaraFunctionLibrary.h"
 
 
 
@@ -214,11 +214,11 @@ void AMainCharacter::ThrowTalisman()
 	FRotator RotateRotation(0, -85, 0);
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 		TalismanInstance->TalismanDataAsset->SkillInfo.Effect,
-		TalismanInstance->GetRootComponent(),   // 부모 컴포넌트
-		NAME_None,                              // 소켓 이름 (필요 없으면 None)
-		FVector::ZeroVector,                    // 상대 위치
-		RotateRotation,                 // 상대 회전
-		EAttachLocation::KeepRelativeOffset,   // 상대 위치 유지
+		TalismanInstance->GetRootComponent(),   // ?罐? ???????
+		NAME_None,                              // ???? ??? (??? ?????? None)
+		FVector::ZeroVector,                    // ??? ???
+		RotateRotation,                 // ??? ???
+		EAttachLocation::KeepRelativeOffset,   // ??? ??? ????
 		true                                    // AutoDestroy
 	);
 
