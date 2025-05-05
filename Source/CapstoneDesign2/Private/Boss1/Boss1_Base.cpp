@@ -3,12 +3,16 @@
 
 #include "Boss1/Boss1_Base.h"
 
+#include "Boss1/Boss1Anim.h"
 #include "Boss1/Boss1_IronGenerator.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
+class UBoss1Anim;
 // Sets default values
 ABoss1_Base::ABoss1_Base()
 {
@@ -30,10 +34,13 @@ ABoss1_Base::ABoss1_Base()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -110.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
-	// Animation
-	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprint(TEXT("/Script/Engine.AnimBlueprint'/Game/ABP/ABP_Boss1.ABP_Boss1_C'"));
-	// if (AnimBlueprint.Succeeded()) GetMesh()->SetAnimInstanceClass(AnimBlueprint.Class);
+	//Animation
+	//Trouble Shooting: 블루프린트 가져올때는 경로 끝에 _C 꼭 붙이기
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprint(TEXT("/Script/Engine.AnimBlueprint'/Game/CapstoneDesign/Blueprints/Boss1/ABP_Boss1Anim.ABP_Boss1Anim_C'"));
+	if (AnimBlueprint.Succeeded()) GetMesh()->SetAnimInstanceClass(AnimBlueprint.Class);
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimPatternMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss1/AM_Boss1_Pattern.AM_Boss1_Pattern'"));
+	if (AnimPatternMontage.Succeeded()) PatternMontage = AnimPatternMontage.Object;
 }
 
 // Called when the game starts or when spawned
@@ -43,6 +50,9 @@ void ABoss1_Base::BeginPlay()
 
 	SpawnDefaultController();
 	
+	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnShootNeedleAimingEndNotify.AddDynamic(this, &ABoss1_Base::ShootNeedle);
+	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnThrowMassAimingEndNotify.AddDynamic(this, &ABoss1_Base::ThrowMass);
+	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnEndOnceNotify.AddDynamic(this, &ABoss1_Base::ShootNeedleEnd);
 }
 
 // Called every frame
@@ -68,7 +78,6 @@ void ABoss1_Base::CheckState(float DeltaTime)
 	default:
 		break;
 	}
-	
 }
 
 void ABoss1_Base::SetStateIdle()
@@ -165,28 +174,61 @@ void ABoss1_Base::MoveToIron(float DeltaTime)
 void ABoss1_Base::ShootNeedleStart()
 {
 	State = EBoss1_State::Aiming;
-	GetWorldTimerManager().SetTimer(CastingTimerHandle, this, &ABoss1_Base::ShootNeedle, ShootNeedleStartDelay, false);
+	PatternState = EBoss1_Pattern_State::ShootNeedle;
+	GetMesh()->GetAnimInstance()->Montage_Play(PatternMontage);
 }
 
 void ABoss1_Base::ShootNeedleEnd()
 {
-	GetWorldTimerManager().SetTimer(CastingTimerHandle, [&]() -> void
+	if (PatternState == EBoss1_Pattern_State::ShootNeedle)
 	{
-		State = EBoss1_State::Tracing;
-	}, ShootNeedleEndDelay, false);
+		EndPattern();
+	}
 }
 
 void ABoss1_Base::ThrowMassStart()
 {
 	State = EBoss1_State::Aiming;
-	GetWorldTimerManager().SetTimer(CastingTimerHandle, this, &ABoss1_Base::ThrowMass, ThrowMassStartDelay, false);
+	PatternState = EBoss1_Pattern_State::ThrowMass;
+	GetMesh()->GetAnimInstance()->Montage_Play(PatternMontage);
+}
+
+void ABoss1_Base::ThrowMass()
+{
+	if (PatternState == EBoss1_Pattern_State::ThrowMass)
+	{
+		State = EBoss1_State::Casting;
+
+		const float Speed = FVector::Dist(GetActorLocation(), PlayerCharacter->GetActorLocation());
+	
+		UGameplayStatics::FSuggestProjectileVelocityParameters ProjectileParams = UGameplayStatics::FSuggestProjectileVelocityParameters(this, GetActorLocation(), PlayerCharacter->GetActorLocation(), Speed);
+		ProjectileParams.ActorsToIgnore.Append({ this, PlayerCharacter });
+
+		FVector LaunchVelocity;
+		UGameplayStatics::SuggestProjectileVelocity(ProjectileParams, LaunchVelocity);
+	
+		ABoss1_Projectile_Mass* Mass = GetWorld()->SpawnActor<ABoss1_Projectile_Mass>(MassProjectile, GetActorLocation(), LaunchVelocity.Rotation());
+		Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
+		Mass->ProjectileMovement->Velocity = LaunchVelocity;
+		Mass->ProjectileMovement->InitialSpeed = Speed;
+		Mass->ProjectileMovement->MaxSpeed = Speed;
+#if WITH_EDITOR
+		Mass->SetFolderPath(FName("Projectiles"));
+#endif
+	}
 }
 
 void ABoss1_Base::ThrowMassEnd()
 {
-	GetWorldTimerManager().SetTimer(CastingTimerHandle, [&]() -> void
+	if (PatternState == EBoss1_Pattern_State::ThrowMass)
 	{
-		State = EBoss1_State::Tracing;
-	}, ThrowMassEndDelay, false);
+		EndPattern();
+	}
 }
 
+void ABoss1_Base::EndPattern()
+{
+	State = EBoss1_State::Tracing;
+	PatternState = EBoss1_Pattern_State::None;
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.0f);
+}

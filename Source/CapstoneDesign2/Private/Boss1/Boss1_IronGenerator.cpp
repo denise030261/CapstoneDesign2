@@ -30,7 +30,7 @@ void ABoss1_IronGenerator::GenerateIron()
 {
 	if (ABoss1_Iron* Iron = GetIronFromPool())
 	{
-		const float RandLength = FMath::FRandRange(0.0f, SpawnRadius);
+		const float RandLength = SpawnRadius * FMath::Sqrt(FMath::FRand());
 		const float RandAngle = FMath::FRandRange(-PI, PI);
 
 		const float XPos = RandLength * FMath::Cos(RandAngle);

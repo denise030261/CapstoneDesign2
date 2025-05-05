@@ -2,6 +2,7 @@
 
 #include "Boss1/Boss1_Phase1.h"
 
+#include "Boss1/Boss1Anim.h"
 #include "Boss1/Boss1_IronGenerator.h"
 #include "Boss1/Boss1_Phase2.h"
 #include "Boss1/Boss1_Projectile_Needle.h"
@@ -20,6 +21,8 @@ ABoss1_Phase1::ABoss1_Phase1()
 void ABoss1_Phase1::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnEndOnceNotify.AddDynamic(this, &ABoss1_Phase1::ThrowMassEnd);
 
 	//PlayerCharacter =  //플레이어 저장
 	IronGenerator = GetWorld()->SpawnActor<ABoss1_IronGenerator>(IronGenerator->StaticClass(), GetActorLocation(), GetActorRotation());
@@ -102,36 +105,16 @@ void ABoss1_Phase1::Trace(float DeltaTime)
 
 void ABoss1_Phase1::ShootNeedle()
 {
-	State = EBoss1_State::Casting;
-	ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), GetActorRotation());
-	Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
-#if WITH_EDITOR
-	Needle->SetFolderPath(FName("Projectiles"));
-#endif
-	ShootNeedleEnd();
-}
-
-void ABoss1_Phase1::ThrowMass()
-{
-	State = EBoss1_State::Casting;
-
-	const float Speed = FVector::Dist(GetActorLocation(), PlayerCharacter->GetActorLocation());
+	if (PatternState == EBoss1_Pattern_State::ShootNeedle)
+	{
+		State = EBoss1_State::Casting;
 	
-	UGameplayStatics::FSuggestProjectileVelocityParameters ProjectileParams = UGameplayStatics::FSuggestProjectileVelocityParameters(this, GetActorLocation(), PlayerCharacter->GetActorLocation(), Speed);
-	ProjectileParams.ActorsToIgnore.Append({ this, PlayerCharacter });
-
-	FVector LaunchVelocity;
-	UGameplayStatics::SuggestProjectileVelocity(ProjectileParams, LaunchVelocity);
-	
-	ABoss1_Projectile_Mass* Mass = GetWorld()->SpawnActor<ABoss1_Projectile_Mass>(MassProjectile, GetActorLocation(), LaunchVelocity.Rotation());
-	Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
-	Mass->ProjectileMovement->Velocity = LaunchVelocity;
-	Mass->ProjectileMovement->InitialSpeed = Speed;
-	Mass->ProjectileMovement->MaxSpeed = Speed;
+		ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), GetActorRotation());
+		Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
 #if WITH_EDITOR
-	Mass->SetFolderPath(FName("Projectiles"));
+		Needle->SetFolderPath(FName("Projectiles"));
 #endif
-	ThrowMassEnd();
+	}
 }
 
 void ABoss1_Phase1::SetToPhase2()

@@ -44,6 +44,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
 	float MeleeAttackEndDelay = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	TArray<UAnimMontage*> MeleeAttackMontages;
 	
 	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
@@ -53,8 +56,6 @@ public:
 
 private:
 	bool CanDamageMeleeAttack = false;
-	int32 ThrowMassCounter;
-	FTimerHandle PatternTimerHandle;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -70,12 +71,14 @@ private:
 	virtual void Trace(float DeltaTime) override;
 
 	void MeleeAttackStart();
+	UFUNCTION()
 	void MeleeAttack();
+	UFUNCTION()
 	void MeleeAttackEnd();
+	UFUNCTION()
+	void MeleeAttackDelayEnd();
 	
 	virtual void ShootNeedle() override;
-	
-	virtual void ThrowMass() override;
 	
 	void SetToRage();
 };
