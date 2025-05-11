@@ -17,6 +17,6 @@ class CAPSTONEDESIGN2_API UTalismanSkillStrategy : public UObject
 public:
     // 스킬 함수 (자식 클래스에서 구현)
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
-    void SkillExecute(ATalisman* Owner);
-    virtual void SkillExecute_Implementation(ATalisman* Owner) PURE_VIRTUAL(UTalismanSkillStrategy::SkillExecute, );
+    void SkillExecute(ATalisman* Owner, UWorld* World);
+    virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) PURE_VIRTUAL(UTalismanSkillStrategy::SkillExecute, );
 };

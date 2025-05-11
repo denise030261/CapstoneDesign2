@@ -12,7 +12,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "NiagaraFunctionLibrary.h"
-
+#include "Blueprint/UserWidget.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,22 @@ void AMainCharacter::BeginPlay()
 	{
 		AnimInst->OnPlayMontageNotifyBegin.AddDynamic(this, &AMainCharacter::HandleOnMontageNotifyComponent);
 		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcComboMontage);
+		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[0]);
+	}
+
+	if (UIPlayerClass)
+	{
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		
+		if (PC == nullptr)
+			return;
+
+		UIPlayerInstance = CreateWidget<UUserWidget>(PC, UIPlayerClass);
+		if (UIPlayerInstance)
+		{
+			UIPlayerInstance->AddToViewport();
+			PC->SetInputMode(FInputModeGameOnly());
+		}
 	}
 }
 
@@ -144,11 +159,40 @@ void AMainCharacter::Attack(const FInputActionValue& Value)
 	if (AnimInst && !bAttack)
 	{
 		bAttack = true;
-		ThrowTalisman();
-		AnimInst->Montage_Play(AttakcComboMontage);
+		FRotator YawRotation(0, GetActorRotation().Yaw, 0);
+		ThrowRotation = YawRotation;
 
-		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcComboMontage);
+		if(Talisman!=nullptr)
+			ThrowTalisman(); // When spawn, Animation
+
+		if(ATalisman* TalismanObject = NewObject<ATalisman>(GetTransientPackage() /*or owner, or whatever */, *Talisman))
+		{
+			if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Blow")
+			{
+				AnimInst->Montage_Play(AttakcMontages[1]);
+				bSkillEffect = false;
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[1]);
+			}
+			else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Throw")
+			{
+				AnimInst->Montage_Play(AttakcMontages[3]);
+				bSkillEffect = false;
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[3]);
+			}
+			else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Dance")
+			{
+				AnimInst->Montage_Play(AttakcMontages[2]);
+				bSkillEffect = false;
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[2]);
+			}
+			else
+			{
+				AnimInst->Montage_Play(AttakcMontages[0]);
+				MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[0]);
+			}
+
+		}
 	}
 	else
 	{
@@ -169,35 +213,41 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 		if (AnimInst)
 		{
 			bAttack = false;
+			bSkillEffect = false;
 			AttackComboIndex = 0;
-			AnimInst->Montage_Stop(0.4f, AttakcComboMontage);
+			SetActorRotation(ThrowRotation); // Origin Rotation
+			AnimInst->Montage_Stop(0.4f, AttakcMontages[0]);
 		}
 	}
 
-	if (NotifyName == "Spawn")
+	if (NotifyName == "Spawn" && Talisman != nullptr)
 		ThrowTalisman();
 }
 
 void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == AttakcComboMontage)
+	if (Montage == AttakcMontages[0])
 	{
-		bAttack = false;
 		AttackComboIndex = 0;
 	}
+	bAttack = false;
 }
 
 void AMainCharacter::ThrowTalisman()
 {
-	FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
-	FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	FVector ForwardDirection = FRotationMatrix(ThrowRotation).GetUnitAxis(EAxis::X);
 	FVector ThrowLocation = GetActorLocation() + ForwardDirection * 200;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	ATalisman* TalismanInstance = GetWorld()->SpawnActor<ATalisman>(Talisman, ThrowLocation, YawRotation, SpawnParams);
+	ATalisman* TalismanInstance = GetWorld()->SpawnActor<ATalisman>(Talisman, ThrowLocation, ThrowRotation, SpawnParams);
+
+	if (TalismanInstance == nullptr)
+		return;
+
 	TalismanInstance->SetMoveDistance(ThrowLocation + ForwardDirection * TalismanInstance->TalismanDataAsset->SkillInfo.Distance);
 
+	// Call SkillExecute Function
 	if (Talisman && TalismanInstance->TalismanDataAsset && TalismanInstance->TalismanDataAsset->SkillInfo.Skill)
 	{
 		UTalismanSkillStrategy* Executor = NewObject<UTalismanSkillStrategy>(
@@ -207,20 +257,37 @@ void AMainCharacter::ThrowTalisman()
 
 		if (Executor)
 		{
-			Executor->SkillExecute(TalismanInstance);  
+			Executor->SkillExecute(TalismanInstance, GetWorld());  
 		}
 	}
 
+	// Talisman Fly Effect
 	FRotator RotateRotation(0, -85, 0);
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 		TalismanInstance->TalismanDataAsset->SkillInfo.Effect,
-		TalismanInstance->GetRootComponent(),   // ?θ? ???????
-		NAME_None,                              // ???? ??? (??? ?????? None)
-		FVector::ZeroVector,                    // ??? ???
-		RotateRotation,                 // ??? ???
-		EAttachLocation::KeepRelativeOffset,   // ??? ??? ????
-		true                                    // AutoDestroy
+		TalismanInstance->GetRootComponent(),   
+		NAME_None,                              
+		FVector::ZeroVector,                   
+		RotateRotation,                 
+		EAttachLocation::KeepRelativeOffset,   
+		true                                    
 	);
+
+	// SkillEffect Spawn
+	if (!bSkillEffect)
+	{
+		UNiagaraComponent* NiagaraSpawn = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TalismanInstance->TalismanDataAsset->SkillInfo.SkillEffect,
+			GetRootComponent(),   
+			NAME_None,                              
+			FVector(0, 0, -95),                    
+			FRotator(0, 0, 0),                 
+			EAttachLocation::KeepRelativeOffset,   
+			true                                   
+		);
+
+		bSkillEffect = true;
+	}
 
 	if (!NiagaraComp)
 	{

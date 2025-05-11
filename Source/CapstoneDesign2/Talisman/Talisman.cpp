@@ -2,6 +2,8 @@
 
 
 #include "Talisman.h"
+#include "RangeAttack.h"
+#include "NormalAttack.h"
 
 // Sets default values
 ATalisman::ATalisman()
@@ -18,10 +20,6 @@ ATalisman::ATalisman()
 		return;
 	
 	RootComponent = TalismanMesh;
-	/*TriggerVolume->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	TriggerVolume->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	TriggerVolume->SetCollisionResponseToAllChannels(ECR_Ignore);
-	TriggerVolume->SetGenerateOverlapEvents(true);*/
 	TriggerVolume->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	TriggerVolume->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	TriggerVolume->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -31,10 +29,29 @@ ATalisman::ATalisman()
 
 void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	SetActorTickEnabled(false); // Don't Tick
+
 	if (ActorHasTag("Player"))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Detect Player"));
 		return;
+	}
+	
+	if (TalismanDataAsset->SkillInfo.Skill)
+	{
+		UTalismanSkillStrategy* AttributeCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
+
+		if (URangeAttack* RangeAttackCDO = Cast<URangeAttack>(AttributeCDO))
+		{
+			RangeAttackCDO->BombAttack(GetWorld(), OtherActor,this);
+			return;
+		}
+		else if (UNormalAttack* NormalAttackCDO = Cast<UNormalAttack>(AttributeCDO))
+		{
+			TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			NormalAttackCDO->Debuff(GetWorld(), OtherActor, this);
+			UE_LOG(LogTemp, Warning, TEXT("Normal Attack"));
+		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Destroy"));
@@ -55,7 +72,6 @@ void ATalisman::BeginPlay()
 
 	if(TriggerVolume)
 		TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &ATalisman::OnOverlapBegin);
-	
 }
 
 // Called every frame

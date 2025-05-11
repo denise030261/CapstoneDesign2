@@ -3,7 +3,7 @@
 
 #include "GodSkill.h"
 
-void UGodSkill::SkillExecute_Implementation(ATalisman* Owner)
+void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
 	;
 }

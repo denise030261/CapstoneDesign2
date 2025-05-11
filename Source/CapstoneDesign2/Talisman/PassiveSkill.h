@@ -15,5 +15,5 @@ class CAPSTONEDESIGN2_API UPassiveSkill : public UTalismanSkillStrategy
 	GENERATED_BODY()
 	
 public:
-	virtual void SkillExecute_Implementation(ATalisman* Owner) override;
+	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
 };

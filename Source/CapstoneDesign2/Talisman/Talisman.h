@@ -34,15 +34,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UBoxComponent* TriggerVolume;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* TalismanMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Speed;
+
+	bool bRangeAttack = false; // if RangeAttack Strategy and Overlap, Call RangeAttack Function
+
+	UPROPERTY()
+	bool bIsDestroyed = false;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* TalismanMesh;
 
 private:
 	FVector3d TargetDistance;
