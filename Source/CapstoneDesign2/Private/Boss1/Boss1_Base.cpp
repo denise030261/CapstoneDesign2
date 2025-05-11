@@ -36,10 +36,10 @@ ABoss1_Base::ABoss1_Base()
 
 	//Animation
 	//Trouble Shooting: 블루프린트 가져올때는 경로 끝에 _C 꼭 붙이기
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprint(TEXT("/Script/Engine.AnimBlueprint'/Game/CapstoneDesign/Blueprints/Boss1/ABP_Boss1Anim.ABP_Boss1Anim_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprint(TEXT("/Script/Engine.AnimBlueprint'/Game/CapstoneDesign/Blueprints/Boss/Boss1/ABP_Boss1Anim.ABP_Boss1Anim_C'"));
 	if (AnimBlueprint.Succeeded()) GetMesh()->SetAnimInstanceClass(AnimBlueprint.Class);
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimPatternMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss1/AM_Boss1_Pattern.AM_Boss1_Pattern'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimPatternMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_Pattern.AM_Boss1_Pattern'"));
 	if (AnimPatternMontage.Succeeded()) PatternMontage = AnimPatternMontage.Object;
 }
 
@@ -74,10 +74,10 @@ void ABoss1_Base::CheckState(float DeltaTime)
 	case EBoss1_State::Aiming:
 		Aiming(DeltaTime);
 		break;
-		
-	default:
-		break;
-	}
+		default:
+        		break;
+        	}
+	
 }
 
 void ABoss1_Base::SetStateIdle()
@@ -199,19 +199,22 @@ void ABoss1_Base::ThrowMass()
 	{
 		State = EBoss1_State::Casting;
 
-		const float Speed = FVector::Dist(GetActorLocation(), PlayerCharacter->GetActorLocation());
+		const float Speed = 600.0f + 0.8f * FVector::Dist(GetActorLocation(), PlayerCharacter->GetActorLocation());
 	
 		UGameplayStatics::FSuggestProjectileVelocityParameters ProjectileParams = UGameplayStatics::FSuggestProjectileVelocityParameters(this, GetActorLocation(), PlayerCharacter->GetActorLocation(), Speed);
 		ProjectileParams.ActorsToIgnore.Append({ this, PlayerCharacter });
+		ProjectileParams.bFavorHighArc = false;
 
 		FVector LaunchVelocity;
-		UGameplayStatics::SuggestProjectileVelocity(ProjectileParams, LaunchVelocity);
-	
+		if (!UGameplayStatics::SuggestProjectileVelocity(ProjectileParams, LaunchVelocity))
+			LaunchVelocity = PlayerCharacter->GetActorLocation() - GetActorLocation();
+		
 		ABoss1_Projectile_Mass* Mass = GetWorld()->SpawnActor<ABoss1_Projectile_Mass>(MassProjectile, GetActorLocation(), LaunchVelocity.Rotation());
 		Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
 		Mass->ProjectileMovement->Velocity = LaunchVelocity;
 		Mass->ProjectileMovement->InitialSpeed = Speed;
 		Mass->ProjectileMovement->MaxSpeed = Speed;
+		
 #if WITH_EDITOR
 		Mass->SetFolderPath(FName("Projectiles"));
 #endif

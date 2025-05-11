@@ -25,7 +25,7 @@ public:
 	float GenerateCoolTime = 5.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float SpawnRadius = 1000.0f;
+	float SpawnRadius = 2000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	int32 MaxIronCount = 20;

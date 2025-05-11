@@ -24,10 +24,10 @@ ABoss1_Phase2::ABoss1_Phase2()
 	WeaponColliderR->SetRelativeScale3D(FVector(1.0f, 1.0f, 2.0f));
 	WeaponColliderR->SetupAttachment(GetMesh());
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMeleeAttackMontageL(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss1/AM_Boss1_MeleeAttack_L.AM_Boss1_MeleeAttack_L'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMeleeAttackMontageL(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_MeleeAttack_L.AM_Boss1_MeleeAttack_L'"));
 	if (AnimMeleeAttackMontageL.Succeeded()) MeleeAttackMontages.Add(AnimMeleeAttackMontageL.Object);
 	
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMeleeAttackMontageR(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss1/AM_Boss1_MeleeAttack_R.AM_Boss1_MeleeAttack_R'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimMeleeAttackMontageR(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_MeleeAttack_R.AM_Boss1_MeleeAttack_R'"));
 	if (AnimMeleeAttackMontageR.Succeeded()) MeleeAttackMontages.Add(AnimMeleeAttackMontageR.Object);
 }
 
