@@ -15,8 +15,11 @@ class CAPSTONEDESIGN2_API UNormalAttack : public UTalismanSkillStrategy
 	GENERATED_BODY()
 	
 public:
-	virtual void SkillExecute_Implementation(ATalisman* Owner) override;
+	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
+
+	FTimerHandle DebuffTimerHandle;
 
 private:
 	ATalisman* OwnTalisman;
+	AActor* TargetActor;
 };

@@ -2,8 +2,13 @@
 
 
 #include "PassiveSkill.h"
+#include "TalismanAttributeStrategy.h"
+#include "Talisman.h"
 
-void UPassiveSkill::SkillExecute_Implementation(ATalisman* Owner)
+void UPassiveSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
-	;
+	if (UTalismanAttributeStrategy* AttributeCDO = Owner->TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>())
+	{
+		AttributeCDO->Passive_Implementation(World);
+	}
 }

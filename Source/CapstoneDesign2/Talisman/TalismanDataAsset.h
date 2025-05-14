@@ -34,10 +34,22 @@ struct FSkillData
     UNiagaraSystem* Effect;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UNiagaraSystem* ExecuteEffect;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UNiagaraSystem* SkillEffect;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TSubclassOf<AActor> SpawnSkill;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSubclassOf<UTalismanAttributeStrategy> Attribute;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TSubclassOf<UTalismanSkillStrategy> Skill;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    FString AnimationType;
 };
 
 UCLASS()

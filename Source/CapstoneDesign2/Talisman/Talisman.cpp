@@ -2,6 +2,11 @@
 
 
 #include "Talisman.h"
+#include "RangeAttack.h"
+#include "NormalAttack.h"
+#include "FireAttribute.h"
+#include "NormalAttribute.h"
+#include "MoveSkill.h"
 
 // Sets default values
 ATalisman::ATalisman()
@@ -18,10 +23,6 @@ ATalisman::ATalisman()
 		return;
 	
 	RootComponent = TalismanMesh;
-	/*TriggerVolume->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	TriggerVolume->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	TriggerVolume->SetCollisionResponseToAllChannels(ECR_Ignore);
-	TriggerVolume->SetGenerateOverlapEvents(true);*/
 	TriggerVolume->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	TriggerVolume->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	TriggerVolume->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -31,10 +32,40 @@ ATalisman::ATalisman()
 
 void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	SetActorTickEnabled(false); // Don't Tick
+
 	if (ActorHasTag("Player"))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Detect Player"));
 		return;
+	}
+	
+	if (TalismanDataAsset->SkillInfo.Skill)
+	{
+		TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision); // For No Call OverlapBegin()
+
+		UTalismanSkillStrategy* SkillCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
+		UTalismanAttributeStrategy* AttributeCDO = TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>();
+
+		AttributeCDO->Attack(GetWorld(), OtherActor, this);
+
+		if (URangeAttack* RangeAttackCDO = Cast<URangeAttack>(SkillCDO))
+		{
+			if (UFireAttribute* FireAttackCDO = Cast<UFireAttribute>(AttributeCDO))
+			{
+				RangeAttackCDO->BombAttack(GetWorld(), OtherActor, this);
+			}
+			else if (UNormalAttribute* NormalAttackCDO = Cast<UNormalAttribute>(AttributeCDO))
+			{
+				RangeAttackCDO->DuplicateAttack(GetWorld(), OtherActor, this);
+			}
+
+			return;
+		}
+		else if (UMoveSkill* MoveSKillCDO = Cast<UMoveSkill>(SkillCDO))
+		{
+			MoveSKillCDO->Moving(GetActorLocation(),GetWorld()->GetFirstPlayerController()->GetCharacter());
+		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Destroy"));
@@ -55,7 +86,6 @@ void ATalisman::BeginPlay()
 
 	if(TriggerVolume)
 		TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &ATalisman::OnOverlapBegin);
-	
 }
 
 // Called every frame
@@ -73,6 +103,11 @@ void ATalisman::Tick(float DeltaTime)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Arrived, Destroying"));
+		UTalismanSkillStrategy* SkillCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
+		if (UMoveSkill* MoveSKillCDO = Cast<UMoveSkill>(SkillCDO))
+		{
+			MoveSKillCDO->Moving(GetActorLocation(), GetWorld()->GetFirstPlayerController()->GetCharacter());
+		}
 		Destroy();
 	}
 }

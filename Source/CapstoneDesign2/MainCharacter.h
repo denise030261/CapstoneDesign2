@@ -56,7 +56,7 @@ public:
 
 	// AttackCombo Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	UAnimMontage* AttakcComboMontage;
+	TArray<UAnimMontage*> AttakcMontages;
 
 	// Call Notify Animation
 	UFUNCTION()
@@ -68,8 +68,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ATalisman> Talisman;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
+	TSubclassOf<UUserWidget> UIPlayerClass;
 
 protected:
 
@@ -108,4 +111,14 @@ private:
 
 	// Montage End Delegate
 	FOnMontageEnded MontageEndDelegate;
+
+	FRotator ThrowRotation;
+
+	UPROPERTY()
+	TObjectPtr<class UUserWidget> UIPlayerInstance;
+
+	// Play Skill Effect?
+	bool bSkillEffect = false; 
+
+	FRotator ForwardRotation;
 };
