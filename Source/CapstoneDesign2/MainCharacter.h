@@ -68,7 +68,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<ATalisman> Talisman;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")

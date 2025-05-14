@@ -4,6 +4,7 @@
 #include "NiagaraSystem.h"
 #include <Kismet/GameplayStatics.h>
 #include <NiagaraFunctionLibrary.h>
+#include "SpawnSkill.h"
 
 void URangeAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
@@ -25,7 +26,6 @@ void URangeAttack::BombAttack(UWorld* World, AActor* OtherActor, ATalisman* This
 		return;
 	}
 
-	ThisTalisman->SetActorEnableCollision(false);
 	FVector TalisManLocation(0, -20, 10);
 	TalisManLocation += OtherActor->GetActorLocation();
 	ThisTalisman->SetActorLocation(TalisManLocation);
@@ -67,4 +67,43 @@ void URangeAttack::Bomb(ATalisman* Talisman, AActor* Target)
 	UE_LOG(LogTemp, Warning, TEXT("Bomb"));
 	UE_LOG(LogTemp, Warning, TEXT("%s : Talisman"), *Talisman->GetName());
 	Talisman->Destroy();
+}
+
+void URangeAttack::DuplicateAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Duplicate"));
+	ThisTalisman->SetActorHiddenInGame(true);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (ThisTalisman && ThisTalisman->TalismanDataAsset && ThisTalisman->TalismanDataAsset->SkillInfo.SpawnSkill && World)
+	{
+		float Distance = ThisTalisman->TalismanDataAsset->SkillInfo.Distance;
+		FVector OriginLocation = ThisTalisman->GetActorLocation();
+		FVector ForwardVector = ThisTalisman->GetActorForwardVector();
+		FVector RightVector = ThisTalisman->GetActorRightVector();
+
+		FVector Locations[4];
+		Locations[0] = OriginLocation + ForwardVector * Distance;
+		Locations[1] = OriginLocation - ForwardVector * Distance;
+		Locations[2] = OriginLocation - RightVector * Distance;
+		Locations[3] = OriginLocation + RightVector * Distance;
+
+		for (int i = 0; i < 4; i++)
+		{
+			FRotator SpawnRotator = ThisTalisman->GetActorRotation();
+			if (i == 0 || i == 1)
+			{
+				SpawnRotator += FRotator(0, 90, 0);
+			}
+			ASpawnSkill* SpawnedActor = World->SpawnActor<ASpawnSkill>(
+				ThisTalisman->TalismanDataAsset->SkillInfo.SpawnSkill,
+				ThisTalisman->GetActorLocation(),
+				SpawnRotator,
+				SpawnParams);
+
+			if(SpawnedActor)
+				SpawnedActor->SpawnMove(Locations[i]);
+		}
+	}
 }

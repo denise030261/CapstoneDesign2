@@ -20,6 +20,8 @@ public:
 
 	void BombAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman);
 
+	void DuplicateAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman);
+
 private:
 	ATalisman* OwnTalisman;
 

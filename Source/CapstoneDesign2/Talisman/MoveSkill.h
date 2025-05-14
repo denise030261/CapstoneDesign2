@@ -4,22 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "TalismanSkillStrategy.h"
-#include "NormalAttack.generated.h"
+#include "MoveSkill.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class CAPSTONEDESIGN2_API UNormalAttack : public UTalismanSkillStrategy
+class CAPSTONEDESIGN2_API UMoveSkill : public UTalismanSkillStrategy
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
 
-	FTimerHandle DebuffTimerHandle;
-
-private:
-	ATalisman* OwnTalisman;
-	AActor* TargetActor;
+	UFUNCTION()
+	void Moving(FVector TargetLocation, ACharacter* Character);
+	
 };

@@ -15,5 +15,6 @@ class CAPSTONEDESIGN2_API UFireAttribute : public UTalismanAttributeStrategy
 	GENERATED_BODY()
 	
 public:
-	virtual void Attack_Implementation(AActor* Owner) override;
+	virtual void Attack_Implementation(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman) override;
+	virtual void Passive_Implementation(UWorld* World) override;
 };

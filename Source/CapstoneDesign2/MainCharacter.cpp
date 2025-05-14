@@ -13,6 +13,7 @@
 #include "InputActionValue.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Blueprint/UserWidget.h"
+#include "Talisman/PassiveSkill.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -162,10 +163,20 @@ void AMainCharacter::Attack(const FInputActionValue& Value)
 		FRotator YawRotation(0, GetActorRotation().Yaw, 0);
 		ThrowRotation = YawRotation;
 
-		if(Talisman!=nullptr)
-			ThrowTalisman(); // When spawn, Animation
+		if (Talisman == nullptr)
+			return;
 
-		if(ATalisman* TalismanObject = NewObject<ATalisman>(GetTransientPackage() /*or owner, or whatever */, *Talisman))
+		ATalisman* TalismanObject = NewObject<ATalisman>(GetTransientPackage() /*or owner, or whatever */, *Talisman);
+
+		if(TalismanObject->TalismanDataAsset->SkillInfo.Attribute)
+			if (UPassiveSkill* PassiveObjecet = Cast<UPassiveSkill>(TalismanObject->TalismanDataAsset->SkillInfo.Attribute))
+			{
+				PassiveObjecet->SkillExecute(TalismanObject, GetWorld());
+			}
+
+		ThrowTalisman(); // When spawn, Animation
+		
+		if(TalismanObject)
 		{
 			if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Blow")
 			{
@@ -215,7 +226,7 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 			bAttack = false;
 			bSkillEffect = false;
 			AttackComboIndex = 0;
-			SetActorRotation(ThrowRotation); // Origin Rotation
+			//SetActorRotation(ThrowRotation); // Origin Rotation
 			AnimInst->Montage_Stop(0.4f, AttakcMontages[0]);
 		}
 	}

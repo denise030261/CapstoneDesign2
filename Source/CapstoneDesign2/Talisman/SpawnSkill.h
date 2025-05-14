@@ -38,12 +38,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	float SpawnDist = 0;
 
+	UPROPERTY(EditAnywhere, Category = "Spawn")
+	float Speed = 10;
+
+	UFUNCTION()
+	void SpawnMove(FVector3d StartLocation);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 
 private:
 	FTimerHandle DestroyHandle; // Destroy Timer
 	ATalisman* OwnTalisman;
 	AActor* TargetActor;
+	FVector3d TargetDistance;
 };

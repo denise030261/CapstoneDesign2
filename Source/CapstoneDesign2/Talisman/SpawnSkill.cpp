@@ -6,7 +6,7 @@
 // Sets default values
 ASpawnSkill::ASpawnSkill()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Effect"));
 	if (NiagaraComponent == nullptr)
@@ -23,6 +23,8 @@ ASpawnSkill::ASpawnSkill()
 	}
 
 	NiagaraComponent->SetupAttachment(RootComponent);
+	// Niagara under static mesh
+	SetActorTickEnabled(false);
 }
 
 // Called when the game starts or when spawned
@@ -43,10 +45,31 @@ void ASpawnSkill::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(DestroyHandle, DestroyDelegate, DestroyTime, false);
 }
 
+void ASpawnSkill::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	FVector StartLocation = GetActorLocation();
+	FVector MoveLocation = TargetDistance - StartLocation;
+
+	if (MoveLocation.Size() > 1)
+	{
+		SetActorLocation(StartLocation + MoveLocation.GetSafeNormal() * Speed * DeltaTime);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Arrived, Destroying"));
+		Destroy();
+	}
+} 
+
 void ASpawnSkill::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Enemy Damage
 }
 
-
-
+void ASpawnSkill::SpawnMove(FVector3d StartLocation)
+{
+	TargetDistance = StartLocation;
+	SetActorTickEnabled(true);
+}
