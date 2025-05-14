@@ -24,6 +24,15 @@ enum class EBoss1_State : uint8
 
 };
 
+UENUM()
+enum class EBoss1_Pattern_State : uint8
+{
+	None UMETA(DisplayName = "None"),
+	ShootNeedle UMETA(DisplayName = "ShootNeedle"),
+	ThrowMass UMETA(DisplayName = "ThrowMass"),
+	MeleeAttack UMETA(DisplayName = "MelleAttack")
+};
+
 UCLASS(Abstract)
 class CAPSTONEDESIGN2_API ABoss1_Base : public ACharacter
 {
@@ -44,11 +53,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EBoss1_State State = EBoss1_State::Spawn;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	EBoss1_Pattern_State PatternState = EBoss1_Pattern_State::None;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	int32 IdleSecond = 3.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float MoveSpeed = 100.0f;
+	float MoveSpeed = 150.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	AMainCharacter* PlayerCharacter;
@@ -70,12 +82,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ShootNeedle")
 	float ShootNeeleDamage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ShootNeedle")
-	float ShootNeedleStartDelay = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ShootNeedle")
-	float ShootNeedleEndDelay = 1.0f;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Pattern|ThrowMass")
 	TSubclassOf<ABoss1_Projectile_Mass> MassProjectile = ABoss1_Projectile_Mass::StaticClass();
@@ -86,11 +92,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ThrowMass")
 	float ThrowMassDamage = 1.0f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ThrowMass")
-	float ThrowMassStartDelay = 1.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ThrowMass")
-	float ThrowMassEndDelay = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* PatternMontage;
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) PURE_VIRTUAL(ABoss1_Base::OnHit, );
@@ -109,12 +112,18 @@ protected:
 	void MoveToIron(float DeltaTime);
 	
 	void ShootNeedleStart();
+	UFUNCTION()
 	virtual void ShootNeedle() PURE_VIRTUAL(ABoss1_Base::ShootNeedle, );
+	UFUNCTION()
 	void ShootNeedleEnd();
 	
 	void ThrowMassStart();
-	virtual void ThrowMass() PURE_VIRTUAL(ABoss1_Base::ThrowMass, );
+	UFUNCTION()
+	void ThrowMass();
+	UFUNCTION()
 	void ThrowMassEnd();
+
+	void EndPattern();
 
 	FRotator CalcSmoothLookAtRotation(const FVector& Location, float DeltaTime) const;
 	

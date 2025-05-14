@@ -49,7 +49,6 @@ private:
 	virtual void Trace(float DeltaTime) override;
 
 	virtual void ShootNeedle() override;
-	virtual void ThrowMass() override;
 	
 	void SetToPhase2();
 
