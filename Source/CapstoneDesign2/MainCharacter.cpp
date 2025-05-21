@@ -14,6 +14,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Talisman/PassiveSkill.h"
+#include <Kismet/GameplayStatics.h>
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -61,19 +62,21 @@ void AMainCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	InitCharacterHP();
 
 	AnimInst = GetMesh()->GetAnimInstance();
 	if (AnimInst)
 	{
 		AnimInst->OnPlayMontageNotifyBegin.AddDynamic(this, &AMainCharacter::HandleOnMontageNotifyComponent);
 		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[0]);
+		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[0]);
 	}
 
 	if (UIPlayerClass)
 	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		
+		PC = GetWorld()->GetFirstPlayerController();
+		PC->bShowMouseCursor = false;
+
 		if (PC == nullptr)
 			return;
 
@@ -140,6 +143,8 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
+
+	// 쓰러지고 일어날 때의 호출
 }
 
 void AMainCharacter::Look(const FInputActionValue& Value)
@@ -159,6 +164,7 @@ void AMainCharacter::Attack(const FInputActionValue& Value)
 {
 	if (AnimInst && !bAttack)
 	{
+		DisableInput(PC);
 		bAttack = true;
 		FRotator YawRotation(0, GetActorRotation().Yaw, 0);
 		ThrowRotation = YawRotation;
@@ -180,27 +186,28 @@ void AMainCharacter::Attack(const FInputActionValue& Value)
 		{
 			if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Blow")
 			{
-				AnimInst->Montage_Play(AttakcMontages[1]);
+				AnimInst->Montage_Play(AttackMontages[1]);
 				bSkillEffect = false;
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[1]);
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[1]);
 			}
 			else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Throw")
 			{
-				AnimInst->Montage_Play(AttakcMontages[3]);
+				AnimInst->Montage_Play(AttackMontages[3]);
 				bSkillEffect = false;
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[3]);
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[3]);
 			}
 			else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Dance")
 			{
-				AnimInst->Montage_Play(AttakcMontages[2]);
+				AnimInst->Montage_Play(AttackMontages[2]);
 				bSkillEffect = false;
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[2]);
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[2]);
+				EnableInput(PC);
 			}
 			else
 			{
-				AnimInst->Montage_Play(AttakcMontages[0]);
+				AnimInst->Montage_Play(AttackMontages[0]);
 				MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttakcMontages[0]);
+				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[0]);
 			}
 
 		}
@@ -227,7 +234,7 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 			bSkillEffect = false;
 			AttackComboIndex = 0;
 			//SetActorRotation(ThrowRotation); // Origin Rotation
-			AnimInst->Montage_Stop(0.4f, AttakcMontages[0]);
+			AnimInst->Montage_Stop(0.4f, AttackMontages[0]);
 		}
 	}
 
@@ -237,11 +244,12 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 
 void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (Montage == AttakcMontages[0])
+	if (Montage == AttackMontages[0])
 	{
 		AttackComboIndex = 0;
 	}
 	bAttack = false;
+	EnableInput(PC);
 }
 
 void AMainCharacter::ThrowTalisman()
@@ -304,5 +312,82 @@ void AMainCharacter::ThrowTalisman()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn and attach Niagara effect"));
 	}
+}
+
+void AMainCharacter::Dancing()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Dancing"));
+
+	AnimInst->Montage_Play(AttackMontages[2]);
+	bSkillEffect = false;
+	AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[2]);
+}
+
+void AMainCharacter::SetCharacterHP(int Num)
+{
+	HP += Num;
+
+	if (Num > 0)
+	{
+		//Heal
+		return;
+	}
+
+	float Stun = 0;
+	if (HP <= 0)
+	{
+		DamageLevel = 3;
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+		Stun = 5.7; // Die Animation Time
+	}
+	else if (Num < 0 && Num >= DamageArea[0])
+	{
+		DamageLevel = 0;
+		Stun = 0.63;
+	} // Small React
+	else if (Num < DamageArea[0] && Num >= DamageArea[1])
+	{
+		DamageLevel = 1;
+		Stun = 1.03;
+	} // Large React
+	else if (Num < DamageArea[1])
+	{
+		DamageLevel = 2;
+		Stun = 5;
+	} // Fall Down
+
+	this->DisableInput(PC);
+	if (DamageMontages[DamageLevel])
+	{
+		AnimInst->Montage_Play(DamageMontages[DamageLevel]);
+	}
+
+	FTimerHandle StunTimerHandle;
+	FTimerDelegate StunDelegate;
+	StunDelegate.BindUObject(this, &AMainCharacter::EnableMovement);
+	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, StunDelegate, Stun, false);
+	// bool variable -> SetHp But Not Stun
+}
+
+void AMainCharacter::EnableMovement()
+{
+	if (DamageLevel==2)
+	{
+		// Get Up Animation
+		AnimInst->Montage_Play(GetupMontage);
+		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
+		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, GetupMontage);
+
+		//return;
+	}
+	else if (DamageLevel == 3)
+	{
+		GetWorldSettings()->SetTimeDilation(0.f);
+		// Show UI Widget
+		return;
+	}
+
+	EnableInput(PC);
 }
 

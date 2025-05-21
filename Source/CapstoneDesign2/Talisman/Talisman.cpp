@@ -64,7 +64,7 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		}
 		else if (UMoveSkill* MoveSKillCDO = Cast<UMoveSkill>(SkillCDO))
 		{
-			MoveSKillCDO->Moving(GetActorLocation(),GetWorld()->GetFirstPlayerController()->GetCharacter());
+			MoveSKillCDO->Moving(GetActorLocation(),GetWorld()->GetFirstPlayerController()->GetCharacter(),this, GetWorld());
 		}
 	}
 
@@ -96,7 +96,7 @@ void ATalisman::Tick(float DeltaTime)
 	FVector StartLocation = GetActorLocation();
 	FVector MoveLocation = TargetDistance - StartLocation;
 
-	if (MoveLocation.Size() > 1)
+	if (MoveLocation.Size() > 10)
 	{
 		SetActorLocation(StartLocation + MoveLocation.GetSafeNormal() * Speed * DeltaTime);
 	}
@@ -106,7 +106,7 @@ void ATalisman::Tick(float DeltaTime)
 		UTalismanSkillStrategy* SkillCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
 		if (UMoveSkill* MoveSKillCDO = Cast<UMoveSkill>(SkillCDO))
 		{
-			MoveSKillCDO->Moving(GetActorLocation(), GetWorld()->GetFirstPlayerController()->GetCharacter());
+			MoveSKillCDO->Moving(GetActorLocation(), GetWorld()->GetFirstPlayerController()->GetCharacter(), this, GetWorld());
 		}
 		Destroy();
 	}

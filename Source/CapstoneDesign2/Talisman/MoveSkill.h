@@ -18,6 +18,9 @@ public:
 	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
 
 	UFUNCTION()
-	void Moving(FVector TargetLocation, ACharacter* Character);
+	void Moving(FVector TargetLocation, ACharacter* Character, ATalisman* Owner, UWorld* World);
+
+private:
+	void FireDance(ATalisman* Owner, UWorld* World, ACharacter* Character);
 	
 };

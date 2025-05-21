@@ -56,7 +56,13 @@ public:
 
 	// AttackCombo Montage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	TArray<UAnimMontage*> AttakcMontages;
+	TArray<UAnimMontage*> AttackMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TArray<UAnimMontage*> DamageMontages;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* GetupMontage;
 
 	// Call Notify Animation
 	UFUNCTION()
@@ -73,6 +79,25 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
 	TSubclassOf<UUserWidget> UIPlayerClass;
+
+	UPROPERTY(EditAnywhere, Category = "Character")
+	int32 MaxHP = 100;
+
+	UFUNCTION()
+	int32 GetCharacterHP() { return HP; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetCharacterHP(int Num);
+
+	UFUNCTION()
+	void InitCharacterHP() { HP = MaxHP; }
+
+	UFUNCTION()
+	void Dancing();
+
+	// Attacking
+	UPROPERTY(EditAnywhere)
+	TArray<int> DamageArea;
 
 protected:
 
@@ -99,6 +124,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool bMovement;
 
+	// Be Damaged Level
+	UPROPERTY(BlueprintReadOnly)
+	int DamageLevel;
+
 private:
 	UFUNCTION()
 	void ThrowTalisman();
@@ -121,4 +150,10 @@ private:
 	bool bSkillEffect = false; 
 
 	FRotator ForwardRotation;
+
+	int32 HP;
+
+	APlayerController* PC;
+
+	void EnableMovement();
 };
