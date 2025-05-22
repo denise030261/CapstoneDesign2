@@ -24,27 +24,21 @@ bool UCanvasCompare::CompareCanvasToTarget(UTextureRenderTarget2D* UserCanvas, U
     int32 Width = UserCanvas->SizeX;
     int32 Height = UserCanvas->SizeY;
 
-    // 1. 정답 텍스처용 머티리얼 로드
+    // 정답 텍스처용 머티리얼 로드
     UMaterialInterface* MaterialThatDisplaysTargetTexture = LoadObject<UMaterialInterface>(
         nullptr,
         TEXT("/Game/CapstoneDesign/Materials/M_FirePattern.M_FirePattern")
 
     );
 
-    if (!MaterialThatDisplaysTargetTexture)
-    {
-        UE_LOG(LogTemp, Error, TEXT("Material load failed!"));
-    }
-
-
-    // 2. RenderTarget 생성 및 텍스처 렌더링
+    // RenderTarget 생성 및 텍스처 렌더링
     UTextureRenderTarget2D* TempRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(
         GWorld, Width, Height, RTF_RGBA8
     );
     UKismetRenderingLibrary::ClearRenderTarget2D(GWorld, TempRenderTarget, FLinearColor::Black);
     UKismetRenderingLibrary::DrawMaterialToRenderTarget(GWorld, TempRenderTarget, MaterialThatDisplaysTargetTexture);
 
-    // 3. 픽셀 읽기
+    // 픽셀 읽기
     FTextureRenderTargetResource* TargetRTResource = TempRenderTarget->GameThread_GetRenderTargetResource();
     TArray<FColor> TargetPixels;
     TargetRTResource->ReadPixels(TargetPixels);
@@ -53,7 +47,7 @@ bool UCanvasCompare::CompareCanvasToTarget(UTextureRenderTarget2D* UserCanvas, U
 
 
     int32 MatchCount = 0;
-    int32 TotalCount = 0; // 이 값은 비교한 픽셀 수에 따라 증가함
+    int32 TotalCount = 0; // 전체 비교한 픽셀 수
 
     float ColorTolerance = FMath::Clamp(Tolerance, 0.0f, 1.0f) * 255.f;
 
@@ -91,5 +85,5 @@ bool UCanvasCompare::CompareCanvasToTarget(UTextureRenderTarget2D* UserCanvas, U
 
 
 
-    return Similarity >= (1.0f - Tolerance); // 예: Tolerance 0.1 -> 90% 이상 일치해야 성공
+    return Similarity >= (1.0f - Tolerance);
 }
