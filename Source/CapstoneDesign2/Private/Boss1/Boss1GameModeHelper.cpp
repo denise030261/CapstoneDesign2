@@ -61,7 +61,7 @@ ABoss1_Phase1* UBoss1GameModeHelper::GenerateBoss1(FVector SpawnLocation, FRotat
 	}
 	else
 	{
-		return GenerateBoss1(SpawnLocation, SpawnRotation);
+		return nullptr;
 	}
 }
 

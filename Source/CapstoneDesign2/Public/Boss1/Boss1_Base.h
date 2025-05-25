@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Damageable.h"
 #include "Boss1/Boss1_Projectile_Mass.h"
 #include "Boss1/Boss1_Projectile_Needle.h"
 #include "GameFramework/Character.h"
@@ -21,7 +22,6 @@ enum class EBoss1_State : uint8
 	Tracing UMETA(DisplayName = "Tracing"),
 	Aiming UMETA(DisplayName = "Aiming"),
 	Casting UMETA(DisplayName = "Casting"),
-
 };
 
 UENUM()
@@ -34,7 +34,7 @@ enum class EBoss1_Pattern_State : uint8
 };
 
 UCLASS(Abstract)
-class CAPSTONEDESIGN2_API ABoss1_Base : public ACharacter
+class CAPSTONEDESIGN2_API ABoss1_Base : public ACharacter, public IDamageable
 {
 	GENERATED_BODY()
 
@@ -68,6 +68,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|Iron")
 	int32 NowIronCount = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|Iron")
+	float EatIronScaleFactor = 1.1f;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Pattern|Iron")
 	ABoss1_IronGenerator* IronGenerator;
 
@@ -81,7 +84,7 @@ public:
 	float ShootNeedleProb = 0.1f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ShootNeedle")
-	float ShootNeeleDamage;
+	float ShootNeeleDamage = 30.0f;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Pattern|ThrowMass")
 	TSubclassOf<ABoss1_Projectile_Mass> MassProjectile = ABoss1_Projectile_Mass::StaticClass();
@@ -90,7 +93,7 @@ public:
 	float ThrowMassProb = 0.1f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ThrowMass")
-	float ThrowMassDamage = 1.0f;
+	float ThrowMassDamage = 30.0f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* PatternMontage;
@@ -106,7 +109,7 @@ protected:
 	void SetStateIdle();
 	void SetTargetIron();
 	void EatIron(ABoss1_Iron* Iron);
-	virtual void Trace(float DeltaTime);
+	virtual void Trace(float DeltaTime) PURE_VIRTUAL(ABoss1_Base::Trace, );
 	void Aiming(float DeltaTime);
 
 	void MoveToIron(float DeltaTime);

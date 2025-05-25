@@ -6,9 +6,12 @@
 #include "Boss1/Boss1Anim.h"
 #include "Boss1/Boss1_Iron.h"
 #include "CapstoneDesign2/MainCharacter.h"
+#include "CapstoneDesign2/Talisman/FireAttribute.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 class ABoss1_Iron;
 // Sets default values
@@ -113,7 +116,7 @@ void ABoss1_Phase2::OnOverlapBegin_Weapon(UPrimitiveComponent* OverlappedCompone
 		{
 			if (CanDamageMeleeAttack)
 			{
-				// Damage To Player
+				Player->SetCharacterHP(-MeleeAttackDamage);
 				CanDamageMeleeAttack = false;
 			}
 		}
@@ -169,11 +172,13 @@ void ABoss1_Phase2::ShootNeedle()
 	{
 		State = EBoss1_State::Casting;
 
-		TArray<float> Rots = { -15.0f, -30.0f, 0.0f, 15.0f, 30.0f };
-	
+		TArray Rots = { -15.0f, -30.0f, 0.0f, 15.0f, 30.0f };
+		
+		const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerCharacter->GetActorLocation());
 		for (int32 i = 0; i < Rots.Num(); i++)
 		{
-			ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), GetActorRotation() + FRotator(0.0f, Rots[i], 0.0f));
+			ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), LookAt + FRotator(0.0f, Rots[i], 0.0f));
+			Needle->Damage = ShootNeeleDamage;
 			Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
 #if WITH_EDITOR
 			Needle->SetFolderPath(FName("Projectiles"));
@@ -198,6 +203,32 @@ void ABoss1_Phase2::MeleeAttack()
 void ABoss1_Phase2::MeleeAttackEnd()
 {
 	CanDamageMeleeAttack = false;
+
+	FRotator Rotation = GetActorRotation();
+	FVector StartLocation = GetActorLocation();
+	StartLocation.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	FVector Direction = PlayerCharacter->GetActorLocation() - StartLocation;
+	Direction.Z = 0;
+	Direction.Normalize();
+	int32 i = 0;
+	
+	FTimerHandle ShockHandle;
+	GetWorldTimerManager().SetTimer(ShockHandle, [&, Rotation, StartLocation, Direction, i, this]() mutable
+	{
+		if (i >= 10)
+		{
+			GetWorldTimerManager().ClearTimer(ShockHandle);
+			return;
+		}
+
+		const FVector Location = StartLocation + Direction * 500.0f * i;
+		ABoss1_MeleeAttackShock* Shock = GetWorld()->SpawnActor<ABoss1_MeleeAttackShock>(MeleeAttackShock, Location, Rotation);
+		Shock->Damage = MeleeAttackShockDamage;
+		i++;
+	},
+	0.2f,
+	true
+	);
 }
 
 void ABoss1_Phase2::MeleeAttackDelayEnd()
@@ -210,3 +241,16 @@ void ABoss1_Phase2::SetToRage()
 	// Set Rage Options
 	
 }
+
+void ABoss1_Phase2::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
+{
+	if (Cast<UFireAttribute>(DataAsset->SkillInfo.Attribute))
+	{
+		
+	}
+	else
+	{
+		
+	}
+}
+

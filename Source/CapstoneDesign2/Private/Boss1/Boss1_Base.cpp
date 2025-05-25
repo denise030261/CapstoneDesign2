@@ -25,7 +25,7 @@ ABoss1_Base::ABoss1_Base()
 	
 	GetCapsuleComponent()->SetCapsuleHalfHeight(120.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(60.0f);
-	GetCapsuleComponent()->SetRelativeScale3D(FVector(0.75f));
+	GetCapsuleComponent()->SetRelativeScale3D(FVector(1.0f));
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ABoss1_Base::OnHit);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Base::OnOverlapBegin);
 	
@@ -74,9 +74,10 @@ void ABoss1_Base::CheckState(float DeltaTime)
 	case EBoss1_State::Aiming:
 		Aiming(DeltaTime);
 		break;
-		default:
-        		break;
-        	}
+		
+	default:
+        	break;
+	}
 	
 }
 
@@ -109,28 +110,7 @@ void ABoss1_Base::EatIron(ABoss1_Iron* Iron)
 {
 	IronGenerator->RemoveIron(Iron);
 	NowIronCount++;
-	RootComponent->SetRelativeScale3D(RootComponent->GetRelativeScale3D() * 1.1f);
-}
-
-void ABoss1_Base::Trace(float DeltaTime)
-{
-	const float Prob_Tick = 1 - FMath::Pow(1 - (ShootNeedleProb + ThrowMassProb), DeltaTime);
-
-	if (FMath::FRand() < Prob_Tick)
-	{
-		if (FMath::FRandRange(0.0f, ShootNeedleProb + ThrowMassProb) < ShootNeedleProb)
-		{
-			ShootNeedleStart();
-		}
-		else
-		{
-			ThrowMassStart();
-		}
-	}
-	else
-	{
-		MoveToIron(DeltaTime);
-	}
+	RootComponent->SetRelativeScale3D(RootComponent->GetRelativeScale3D() * EatIronScaleFactor);
 }
 
 FRotator ABoss1_Base::CalcSmoothLookAtRotation(const FVector& Location, const float DeltaTime) const
@@ -210,7 +190,8 @@ void ABoss1_Base::ThrowMass()
 			LaunchVelocity = PlayerCharacter->GetActorLocation() - GetActorLocation();
 		
 		ABoss1_Projectile_Mass* Mass = GetWorld()->SpawnActor<ABoss1_Projectile_Mass>(MassProjectile, GetActorLocation(), LaunchVelocity.Rotation());
-		Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
+		Mass->Damage = ThrowMassDamage;
+		Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
 		Mass->ProjectileMovement->Velocity = LaunchVelocity;
 		Mass->ProjectileMovement->InitialSpeed = Speed;
 		Mass->ProjectileMovement->MaxSpeed = Speed;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Boss1_MeleeAttackShock.h"
 #include "Boss1/Boss1_Base.h"
 #include "Boss1_Phase2.generated.h"
 
@@ -20,12 +21,6 @@ class CAPSTONEDESIGN2_API ABoss1_Phase2 : public ABoss1_Base
 public:
 	// Sets default values for this character's properties
 	ABoss1_Phase2();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ThrowMass")
-	int32 ThrowMassCount = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|ThrowMass")
-	float ThrowMassDelay = 0.5f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
 	UBoxComponent* WeaponColliderL;
@@ -37,14 +32,14 @@ public:
 	float MeleeAttackProb = 0.1f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
-	float MeleeAttackDamage = 1.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
-	float MeleeAttackStartDelay = 1.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
-	float MeleeAttackEndDelay = 1.0f;
+	float MeleeAttackDamage = 30.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
+	float MeleeAttackShockDamage = 30.0f;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Pattern|MeleeAttack")
+	TSubclassOf<ABoss1_MeleeAttackShock> MeleeAttackShock = ABoss1_MeleeAttackShock::StaticClass();
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	TArray<UAnimMontage*> MeleeAttackMontages;
 	
@@ -54,6 +49,9 @@ public:
 	UFUNCTION()
 	void OnOverlapBegin_Weapon(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	virtual void DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset) override;
+	
 private:
 	bool CanDamageMeleeAttack = false;
 	

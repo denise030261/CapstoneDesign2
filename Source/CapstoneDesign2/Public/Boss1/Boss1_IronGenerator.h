@@ -22,7 +22,7 @@ public:
 	USceneComponent* SceneComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float GenerateCoolTime = 5.0f;
+	float GenerateCoolTime = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float SpawnRadius = 2000.0f;

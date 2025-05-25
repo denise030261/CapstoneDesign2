@@ -7,8 +7,10 @@
 #include "Boss1/Boss1_Phase2.h"
 #include "Boss1/Boss1_Projectile_Needle.h"
 #include "CapstoneDesign2/MainCharacter.h"
+#include "CapstoneDesign2/Talisman/FireAttribute.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABoss1_Phase1::ABoss1_Phase1()
@@ -69,7 +71,7 @@ void ABoss1_Phase1::CheckState(float DeltaTime)
 	switch (State)
 	{
 	case EBoss1_State::Tracing:
-		Trace(DeltaTime);
+		MoveToIron(DeltaTime);
 		break;
 
 	case EBoss1_State::Aiming:
@@ -84,23 +86,7 @@ void ABoss1_Phase1::CheckState(float DeltaTime)
 
 void ABoss1_Phase1::Trace(float DeltaTime)
 {
-	float Prob_Tick = 1 - FMath::Pow(1 - (ShootNeedleProb + ThrowMassProb), DeltaTime);
-
-	if (FMath::FRand() < Prob_Tick)
-	{
-		if (FMath::FRandRange(0.0f, ShootNeedleProb + ThrowMassProb) < ShootNeedleProb)
-		{
-			ShootNeedleStart();
-		}
-		else
-		{
-			ThrowMassStart();
-		}
-	}
-	else
-	{
-		MoveToIron(DeltaTime);
-	}
+	MoveToIron(DeltaTime);
 }
 
 void ABoss1_Phase1::ShootNeedle()
@@ -108,9 +94,10 @@ void ABoss1_Phase1::ShootNeedle()
 	if (PatternState == EBoss1_Pattern_State::ShootNeedle)
 	{
 		State = EBoss1_State::Casting;
-	
-		ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), GetActorRotation());
-		Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
+		const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerCharacter->GetActorLocation());
+		ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), LookAt);
+		Needle->Damage = ShootNeeleDamage;
+		Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
 #if WITH_EDITOR
 		Needle->SetFolderPath(FName("Projectiles"));
 #endif
@@ -129,4 +116,28 @@ void ABoss1_Phase1::SetToPhase2()
 	}
 	
 	Destroy();
+}
+
+void ABoss1_Phase1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
+{
+	if (Cast<UFireAttribute>(DataAsset->SkillInfo.Attribute))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("불 히트!"));
+		
+		if (State == EBoss1_State::Idle || State == EBoss1_State::Tracing)
+		{
+			if (FMath::FRand() * (ShootNeedleProb + ThrowMassProb) < ShootNeedleProb)
+			{
+				ShootNeedleStart();
+			}
+			else
+			{
+				ThrowMassStart();
+			}
+		}
+	}
+	else
+	{
+		
+	}
 }
