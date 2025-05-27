@@ -26,6 +26,7 @@ ABoss1_Base::ABoss1_Base()
 	GetCapsuleComponent()->SetCapsuleHalfHeight(120.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(60.0f);
 	GetCapsuleComponent()->SetRelativeScale3D(FVector(1.0f));
+	GetCapsuleComponent()->SetCollisionProfileName(FName("Boss1"));
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ABoss1_Base::OnHit);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Base::OnOverlapBegin);
 	
@@ -63,28 +64,10 @@ void ABoss1_Base::Tick(float DeltaTime)
 	CheckState(DeltaTime);
 }
 
-void ABoss1_Base::CheckState(float DeltaTime)
-{
-	switch (State)
-	{
-	case EBoss1_State::Tracing:
-		Trace(DeltaTime);
-		break;
-
-	case EBoss1_State::Aiming:
-		Aiming(DeltaTime);
-		break;
-		
-	default:
-        	break;
-	}
-	
-}
-
 void ABoss1_Base::SetStateIdle()
 {
 	State = EBoss1_State::Idle;
-	GetWorldTimerManager().SetTimer(IdleTimerHandle, [&]() -> void
+	GetWorldTimerManager().SetTimer(IdleTimerHandle, [&]
 	{
 		SetTargetIron();
 		State = EBoss1_State::Tracing;
@@ -97,20 +80,35 @@ void ABoss1_Base::SetTargetIron()
 
 	for (ABoss1_Iron* Iron : IronGenerator->SpawnedIrons)
 	{
-		const float Length = FVector::DistSquared(GetActorLocation(), Iron->GetActorLocation());
-		if (Length < MinLength)
+		if (IsValid(Iron))
 		{
-			TargetIron = Iron;
-			MinLength = Length;
+			const float Length = FVector::DistSquared(GetActorLocation(), Iron->GetActorLocation());
+			if (Length < MinLength)
+			{
+				TargetIron = Iron;
+				MinLength = Length;
+			}
 		}
 	}
 }
 
 void ABoss1_Base::EatIron(ABoss1_Iron* Iron)
 {
+	State = EBoss1_State::Eating;
+	InitGrow(GetActorRelativeScale3D().X, GetActorRelativeScale3D().X * EatIronScaleFactor, EatIronTime);
+	GetWorldTimerManager().SetTimer(CastingTimerHandle, [&] { EndEatIron(); }, EatIronTime, false);
+	
 	IronGenerator->RemoveIron(Iron);
-	NowIronCount++;
-	RootComponent->SetRelativeScale3D(RootComponent->GetRelativeScale3D() * EatIronScaleFactor);
+	if (NowIronCount < MaxIronCount)
+	{
+		NowIronCount++;
+		MoveSpeed *= 1.1f;
+		GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	}
+	else
+	{
+		NowHp = FMath::Clamp(NowHp + EatIronHealValue, 0.0f, MaxHp);
+	}
 }
 
 FRotator ABoss1_Base::CalcSmoothLookAtRotation(const FVector& Location, const float DeltaTime) const
@@ -190,7 +188,7 @@ void ABoss1_Base::ThrowMass()
 			LaunchVelocity = PlayerCharacter->GetActorLocation() - GetActorLocation();
 		
 		ABoss1_Projectile_Mass* Mass = GetWorld()->SpawnActor<ABoss1_Projectile_Mass>(MassProjectile, GetActorLocation(), LaunchVelocity.Rotation());
-		Mass->Damage = ThrowMassDamage;
+		Mass->Damage = ThrowMassDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
 		Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
 		Mass->ProjectileMovement->Velocity = LaunchVelocity;
 		Mass->ProjectileMovement->InitialSpeed = Speed;
@@ -212,7 +210,24 @@ void ABoss1_Base::ThrowMassEnd()
 
 void ABoss1_Base::EndPattern()
 {
-	State = EBoss1_State::Tracing;
 	PatternState = EBoss1_Pattern_State::None;
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.0f);
+	IdleSecond = FMath::FRand() * IdleSecondBase;
+	SetStateIdle();
+}
+
+void ABoss1_Base::InitGrow(const float StartScale, const float EndScale, const float TotalTime)
+{
+	GrowStartScale = StartScale;
+	GrowEndScale = EndScale;
+	GrowDeltaTime = 0.0f;
+	GrowTotalTime = TotalTime;
+}
+
+void ABoss1_Base::Grow(float DeltaTime)
+{
+	GrowDeltaTime += DeltaTime;
+	const float Alpha = FMath::Clamp(GrowDeltaTime / GrowTotalTime, 0.0f, 1.0f);
+	const float NewScale = FMath::Lerp(GrowStartScale, GrowEndScale, Alpha);
+	SetActorRelativeScale3D(FVector(NewScale));
 }

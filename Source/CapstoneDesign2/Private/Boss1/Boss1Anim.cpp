@@ -15,12 +15,14 @@ void UBoss1Anim::NativeUpdateAnimation(float DeltaSeconds)
 		MoveAnimationPlayRate = CalcMoveAnimationPlayRate(Boss1);
 		AnimMoveSpeed = CalcSpeed(Boss1);
 		AnimMoveDirection = CalcDirectionAngle(Boss1);
+		
+		State = Boss1->State;
 	}
 }
 
 float UBoss1Anim::CalcMoveAnimationPlayRate(const ACharacter* Character) const
 {
-	return Character->GetCharacterMovement()->GetMaxSpeed() / MinAnimMoveSpeed;
+	return Character->GetCharacterMovement()->GetMaxSpeed() / (MinAnimMoveSpeed * Character->GetActorScale3D().X);
 }
 
 bool UBoss1Anim::CanTransitionToMove() const

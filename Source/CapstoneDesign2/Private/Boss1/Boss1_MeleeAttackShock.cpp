@@ -11,14 +11,13 @@ class AMainCharacter;
 // Sets default values
 ABoss1_MeleeAttackShock::ABoss1_MeleeAttackShock()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	
+
 	// 충돌 컴포넌트 설정
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(FName("SphereCollider"));
 	CollisionComponent->InitSphereRadius(250.0f);
+	CollisionComponent->SetRelativeScale3D(FVector(0.4f));
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_MeleeAttackShock::OnBeginOverlap);
 	RootComponent = CollisionComponent;
@@ -35,8 +34,6 @@ ABoss1_MeleeAttackShock::ABoss1_MeleeAttackShock()
 void ABoss1_MeleeAttackShock::BeginPlay()
 {
 	Super::BeginPlay();
-
-	DrawDebugSphere(GetWorld(), GetActorLocation(), CollisionComponent->GetScaledSphereRadius(), 12, FColor::Red, false, PersistentTime);
 	FTimerHandle CanDealDamageHandle;
 	GetWorldTimerManager().SetTimer(CanDealDamageHandle, [&] { CanDealDamage = false; }, PersistentTime, false);
 }
@@ -44,7 +41,6 @@ void ABoss1_MeleeAttackShock::BeginPlay()
 // Called every frame
 void ABoss1_MeleeAttackShock::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
 	if (CanDealDamage && OtherActor && OtherActor != this) // 자신과의 겹침을 방지
 	{
 		if (AMainCharacter* Player = Cast<AMainCharacter>(OtherActor))
