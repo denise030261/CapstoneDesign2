@@ -11,7 +11,6 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Materials/MaterialInstanceConstant.h"
 #include "Monsters/MonsterUI.h"
 #include "Monsters/Monster0/Monster0Anim.h"
 
@@ -39,18 +38,13 @@ AMonster0::AMonster0()
 	if (UIBlueprint.Succeeded()) MonsterUI->SetWidgetClass(UIBlueprint.Class);
 	MonsterUI->SetWidgetSpace(EWidgetSpace::World);
 	MonsterUI->SetBlendMode(EWidgetBlendMode::Transparent);
-	MonsterUI->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+	MonsterUI->SetRelativeLocation(FVector(0.0f, 0.0f, 110.0f));
 	MonsterUI->SetupAttachment(RootComponent);
 	
 	WeaponColliderL = CreateDefaultSubobject<UBoxComponent>(FName("Weapon Collider L"));
 	WeaponColliderL->OnComponentBeginOverlap.AddDynamic(this, &AMonster0::OnWeaponOverlapBegin);
 	WeaponColliderL->SetBoxExtent(FVector(5.0f, 5.0f, 45.0f));
 	WeaponColliderL->SetupAttachment(RootComponent);
-	
-	WeaponColliderR = CreateDefaultSubobject<UBoxComponent>(FName("Weapon Collider R"));
-	WeaponColliderR->OnComponentBeginOverlap.AddDynamic(this, &AMonster0::OnWeaponOverlapBegin);
-	WeaponColliderR->SetBoxExtent(FVector(5.0f, 5.0f, 45.0f));
-	WeaponColliderR->SetupAttachment(RootComponent);
 	
 	//Animation
 	//Trouble Shooting: 블루프린트 가져올때는 경로 끝에 _C 꼭 붙이기
@@ -74,7 +68,8 @@ void AMonster0::BeginPlay()
 
 	NowHp = MaxHp;
 
-	PlayerCharacter = Cast<AMainCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (GetWorld()->GetFirstPlayerController())
+		PlayerCharacter = Cast<AMainCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnCanDamageAttackEndNotify.AddDynamic(this, &AMonster0::EndCanDamageAttack);
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnAttackEndNotify.AddDynamic(this, &AMonster0::EndAttack);
@@ -96,15 +91,17 @@ void AMonster0::Tick(float DeltaTime)
 
 void AMonster0::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
-	NowHp = FMath::Clamp(NowHp - DamageAmount, 0.0f, MaxHp);
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
-
-	if (NowHp <= 0)
+	if (State != EMonster0_State::Die)
 	{
-		SetDie();
+		NowHp = FMath::Clamp(NowHp - DamageAmount, 0.0f, MaxHp);
+		Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
+
+		if (NowHp <= 0)
+		{
+			SetDie();
+		}
 	}
 }
-
 
 void AMonster0::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -112,7 +109,6 @@ void AMonster0::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 	{
 		if (AMainCharacter* Character = Cast<AMainCharacter>(OtherActor))
 		{
-			GetWorld()->SpawnActor<AMonster0>();
 			Character->SetCharacterHP(-AttackDamage);
 			CanDamageAttack = false;
 		}
@@ -180,7 +176,7 @@ FRotator AMonster0::CalcSmoothLookAtRotation(const FVector& Location, const floa
 	return SmoothRotation;
 }
 
-void AMonster0::Gaze(float DeltaTime)
+void AMonster0::Gaze(const float DeltaTime)
 {
 	const FRotator SmoothRotation = CalcSmoothLookAtRotation(PlayerCharacter->GetActorLocation(), DeltaTime);
 
@@ -206,29 +202,14 @@ void AMonster0::UpdateWeaponColliders() const
 	
 	WeaponColliderL->SetWorldLocation(WeaponLLocation);
 	WeaponColliderL->SetWorldRotation(WeaponLRotation);
-
-	const FVector WeaponRStartPos = GetMesh()->GetSocketLocation(FName("FX_WeaponBase_R"));
-	const FVector WeaponREndPos = GetMesh()->GetSocketLocation(FName("FX_WeaponTip_R"));
-	const FVector WeaponRLocation = (WeaponRStartPos + WeaponREndPos) / 2.0f;
-	FRotator WeaponRRotation = (WeaponREndPos - WeaponRStartPos).Rotation();
-	WeaponRRotation.Pitch += 90;
-	
-	WeaponColliderR->SetWorldLocation(WeaponRLocation);
-	WeaponColliderR->SetWorldRotation(WeaponRRotation);
 	
 	DrawDebugBox(GetWorld(),
 		WeaponColliderL->GetComponentLocation(),
 		WeaponColliderL->GetScaledBoxExtent(),
 		WeaponColliderL->GetComponentQuat(),
-		CanDamageAttack ? FColor::Red : FColor::Green, false, -1.f, 0, 2.f);
-
-	DrawDebugBox(GetWorld(),
-		WeaponColliderR->GetComponentLocation(),
-		WeaponColliderR->GetScaledBoxExtent(),
-		WeaponColliderR->GetComponentQuat(),
-		CanDamageAttack ? FColor::Red : FColor::Green, false, -1.f, 0, 2.f);
+		CanDamageAttack ? FColor::Red : FColor::Green,
+		false);
 }
-
 
 void AMonster0::SetDie()
 {

@@ -26,7 +26,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_AttackEndNotify() const;
-
+	
 	UPROPERTY(BlueprintAssignable, Category = "Animation Notifies")
 	FOnAttackEndNotify OnAttackEndNotify;
 };

@@ -47,9 +47,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UBoxComponent* WeaponColliderL;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	UBoxComponent* WeaponColliderR;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EMonster0_State State = EMonster0_State::Idle;
 
