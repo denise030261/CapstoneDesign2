@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Monster0.generated.h"
 
+class UWidgetComponent;
 class AMainCharacter;
 class UBoxComponent;
 
@@ -40,6 +41,9 @@ public:
 	UFUNCTION()
 	virtual void OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> MonsterUI;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UBoxComponent* WeaponColliderL;
 	
@@ -91,6 +95,8 @@ private:
 	
 	FRotator CalcSmoothLookAtRotation(const FVector& Location, const float DeltaTime) const;
 	void Gaze(const float DeltaTime);
+
+	void UpdateUI() const;
 	void UpdateWeaponColliders() const;
 	void SetDie();
 };

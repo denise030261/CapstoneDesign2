@@ -3,11 +3,16 @@
 
 #include "Monsters/Monster0/Monster0.h"
 
+#include "Blueprint/UserWidget.h"
+#include "Camera/CameraComponent.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Materials/MaterialInstanceConstant.h"
+#include "Monsters/MonsterUI.h"
 #include "Monsters/Monster0/Monster0Anim.h"
 
 // Sets default values
@@ -29,6 +34,14 @@ AMonster0::AMonster0()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
+	MonsterUI = CreateDefaultSubobject<UWidgetComponent>(FName("MonsterUI"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> UIBlueprint(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/CapstoneDesign/Blueprints/Monster/BP_MonsterUI.BP_MonsterUI_C'"));
+	if (UIBlueprint.Succeeded()) MonsterUI->SetWidgetClass(UIBlueprint.Class);
+	MonsterUI->SetWidgetSpace(EWidgetSpace::World);
+	MonsterUI->SetBlendMode(EWidgetBlendMode::Transparent);
+	MonsterUI->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+	MonsterUI->SetupAttachment(RootComponent);
+	
 	WeaponColliderL = CreateDefaultSubobject<UBoxComponent>(FName("Weapon Collider L"));
 	WeaponColliderL->OnComponentBeginOverlap.AddDynamic(this, &AMonster0::OnWeaponOverlapBegin);
 	WeaponColliderL->SetBoxExtent(FVector(5.0f, 5.0f, 45.0f));
@@ -65,6 +78,10 @@ void AMonster0::BeginPlay()
 
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnCanDamageAttackEndNotify.AddDynamic(this, &AMonster0::EndCanDamageAttack);
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnAttackEndNotify.AddDynamic(this, &AMonster0::EndAttack);
+
+	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetMonsterName(TEXT("요괴"));
+	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetMaxHp(MaxHp);
+	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
 }
 
 // Called every frame
@@ -73,12 +90,14 @@ void AMonster0::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateWeaponColliders();
+	UpdateUI();
 	CheckState(DeltaTime);
 }
 
 void AMonster0::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
 	NowHp = FMath::Clamp(NowHp - DamageAmount, 0.0f, MaxHp);
+	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
 
 	if (NowHp <= 0)
 	{
@@ -93,6 +112,7 @@ void AMonster0::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 	{
 		if (AMainCharacter* Character = Cast<AMainCharacter>(OtherActor))
 		{
+			GetWorld()->SpawnActor<AMonster0>();
 			Character->SetCharacterHP(-AttackDamage);
 			CanDamageAttack = false;
 		}
@@ -165,6 +185,14 @@ void AMonster0::Gaze(float DeltaTime)
 	const FRotator SmoothRotation = CalcSmoothLookAtRotation(PlayerCharacter->GetActorLocation(), DeltaTime);
 
 	SetActorRotation(SmoothRotation);
+}
+
+void AMonster0::UpdateUI() const
+{
+	const FVector CameraLocation = PlayerCharacter->GetFollowCamera()->GetComponentLocation();
+	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(MonsterUI->GetComponentLocation(), CameraLocation);
+
+	MonsterUI->SetWorldRotation(LookAtRotation);
 }
 
 
