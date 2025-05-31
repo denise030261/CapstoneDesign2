@@ -3,6 +3,9 @@
 
 #include "Boss1/Boss1_Iron.h"
 
+#include "Landscape.h"
+#include "CapstoneDesign2/Talisman/FireAttribute.h"
+#include "CapstoneDesign2/Talisman/TalismanDataAsset.h"
 #include "Components/SphereComponent.h"
 
 // Sets default values
@@ -11,13 +14,15 @@ ABoss1_Iron::ABoss1_Iron()
 	PrimaryActorTick.bCanEverTick = false;
 	
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMeshComponent"));
+	StaticMeshComponent->SetRelativeScale3D(FVector(2.0f));
 	StaticMeshComponent->SetEnableGravity(true);
-	StaticMeshComponent->BodyInstance.bLockXTranslation = true;
-	StaticMeshComponent->BodyInstance.bLockYTranslation = true;
 	StaticMeshComponent->BodyInstance.bLockXRotation = true;
 	StaticMeshComponent->BodyInstance.bLockYRotation = true;
 	StaticMeshComponent->BodyInstance.bLockZRotation = true;
 	RootComponent = StaticMeshComponent;
+	
+	StaticMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
+	StaticMeshComponent->OnComponentHit.AddDynamic(this, &ABoss1_Iron::OnHit);
 
 	for (FSoftObjectPath Path: MeshPaths)
 	{
@@ -33,7 +38,7 @@ ABoss1_Iron::ABoss1_Iron()
 void ABoss1_Iron::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	Disable();
 }
 
@@ -45,29 +50,32 @@ void ABoss1_Iron::SetRandomMesh()
 
 void ABoss1_Iron::Enable(const FVector Location, const FRotator Rotation)
 {
-	if (!Enabled)
-	{
-		SetActorLocation(Location);
-		SetActorRotation(Rotation);
+	SetActorLocationAndRotation(Location, Rotation, false, nullptr, ETeleportType::TeleportPhysics);
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	StaticMeshComponent->SetSimulatePhysics(true);
 	
-		SetRandomMesh();
-		SetActorHiddenInGame(false);
-		SetActorEnableCollision(true);
-		StaticMeshComponent->SetSimulatePhysics(true);
-
-		Enabled = true;
-	}
+	Enabled = true;
 }
 
 void ABoss1_Iron::Disable()
 {
-	if (Enabled)
-	{
-		SetActorHiddenInGame(true);
-		SetActorEnableCollision(false);
-		StaticMeshComponent->SetSimulatePhysics(false);
-	
-		Enabled = false;
-	}
+	SetActorLocation(FVector(0, 0, -10000));
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	StaticMeshComponent->SetSimulatePhysics(false);
+	SetRandomMesh();
+
+	Enabled = false;
 }
 
+void ABoss1_Iron::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor && OtherActor != this) // 자신과의 겹침을 방지
+	{
+		if (OtherActor->IsA(ALandscape::StaticClass()))
+		{
+			StaticMeshComponent->SetSimulatePhysics(false);
+		}
+	}
+}

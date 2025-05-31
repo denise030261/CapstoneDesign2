@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Damageable.h"
 #include "GameFramework/Actor.h"
 #include "Boss1_Iron.generated.h"
 
@@ -49,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Pooling")
 	void Disable();
 
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Mesh")
 	TArray<UStaticMesh*> Meshes;

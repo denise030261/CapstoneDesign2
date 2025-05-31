@@ -7,14 +7,21 @@
 #include "Boss1/Boss1_Phase2.h"
 #include "Boss1/Boss1_Projectile_Needle.h"
 #include "CapstoneDesign2/MainCharacter.h"
+#include "CapstoneDesign2/Talisman/FireAttribute.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABoss1_Phase1::ABoss1_Phase1()
 {
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGrux/Characters/Heroes/Grux/Meshes/Grux.Grux'"));
 	if (MeshAsset.Succeeded()) GetMesh()->SetSkeletalMesh(MeshAsset.Object);
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimSpawnMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_Spawn.AM_Boss1_Spawn'"));
+	if (AnimSpawnMontage.Succeeded()) SpawnMontage = AnimSpawnMontage.Object;
 }
 
 // Called when the game starts or when spawned
@@ -32,6 +39,8 @@ void ABoss1_Phase1::BeginPlay()
 	FTimerHandle SpawnHandle;
 	constexpr float SpawnTime = 2.0f;
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ABoss1_Phase1::SetStateIdle, SpawnTime, false);
+	
+	GetMesh()->GetAnimInstance()->Montage_Play(SpawnMontage);
 }
 
 // Called every frame
@@ -55,11 +64,6 @@ void ABoss1_Phase1::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 		if (ABoss1_Iron* Iron = Cast<ABoss1_Iron>(OtherActor))
 		{
 			EatIron(Iron);
-			SetStateIdle();
-			if (NowIronCount >= MaxIronCount)
-			{
-				SetToPhase2();
-			}
 		}
 	}
 }
@@ -68,8 +72,12 @@ void ABoss1_Phase1::CheckState(float DeltaTime)
 {
 	switch (State)
 	{
+	case EBoss1_State::Eating:
+		Grow(DeltaTime);
+		break;
+		
 	case EBoss1_State::Tracing:
-		Trace(DeltaTime);
+		MoveToIron(DeltaTime);
 		break;
 
 	case EBoss1_State::Aiming:
@@ -84,22 +92,16 @@ void ABoss1_Phase1::CheckState(float DeltaTime)
 
 void ABoss1_Phase1::Trace(float DeltaTime)
 {
-	float Prob_Tick = 1 - FMath::Pow(1 - (ShootNeedleProb + ThrowMassProb), DeltaTime);
+	MoveToIron(DeltaTime);
+}
 
-	if (FMath::FRand() < Prob_Tick)
+void ABoss1_Phase1::EndEatIron()
+{
+	IdleSecond = IdleSecondBase;
+	SetStateIdle();
+	if (NowIronCount >= MaxIronCount)
 	{
-		if (FMath::FRandRange(0.0f, ShootNeedleProb + ThrowMassProb) < ShootNeedleProb)
-		{
-			ShootNeedleStart();
-		}
-		else
-		{
-			ThrowMassStart();
-		}
-	}
-	else
-	{
-		MoveToIron(DeltaTime);
+		SetToPhase2();
 	}
 }
 
@@ -108,9 +110,10 @@ void ABoss1_Phase1::ShootNeedle()
 	if (PatternState == EBoss1_Pattern_State::ShootNeedle)
 	{
 		State = EBoss1_State::Casting;
-	
-		ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), GetActorRotation());
-		Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(1.1f, NowIronCount));
+		const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerCharacter->GetActorLocation());
+		ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), LookAt);
+		Needle->Damage = ShootNeeleDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
+		Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
 #if WITH_EDITOR
 		Needle->SetFolderPath(FName("Projectiles"));
 #endif
@@ -120,13 +123,56 @@ void ABoss1_Phase1::ShootNeedle()
 void ABoss1_Phase1::SetToPhase2()
 {
 	GetWorldTimerManager().ClearTimer(Phase1TimerHandle);
-	if (auto c= GetWorld()->SpawnActor<ABoss1_Phase2>(Boss1_Phase2ToSpawn, GetActorLocation(), GetActorRotation()))
+	const FTransform SpawnTransform(GetActorRotation(), GetActorLocation());
+	if (ABoss1_Phase2* Phase2 = GetWorld()->SpawnActorDeferred<ABoss1_Phase2>(Boss1_Phase2ToSpawn, SpawnTransform))
 	{
-		c->NowIronCount = NowIronCount;
-		c->PlayerCharacter = PlayerCharacter;
-		c->IronGenerator = IronGenerator;
-		c->GetRootComponent()->SetRelativeScale3D(GetRootComponent()->GetRelativeScale3D());
+		GetCapsuleComponent()->IgnoreActorWhenMoving(Phase2, true);
+		Phase2->MaxHp = MaxHp;
+		Phase2->NowHp = NowHp;
+		Phase2->IdleSecond = IdleSecondBase;
+		Phase2->IdleSecondBase = IdleSecondBase;
+		Phase2->MoveSpeed = Phase2->Phase2MoveSpeed;
+		Phase2->GetCharacterMovement()->MaxWalkSpeed = Phase2->Phase2MoveSpeed;
+		Phase2->PlayerCharacter = PlayerCharacter;
+		Phase2->NowIronCount = NowIronCount;
+		Phase2->MaxIronCount = MaxIronCount;
+		Phase2->EatIronScaleFactor = EatIronScaleFactor;
+		Phase2->EatIronDamageFactor = EatIronDamageFactor;
+		Phase2->EatIronHealValue = EatIronHealValue;
+		Phase2->EatIronTime = EatIronTime;
+		Phase2->IronGenerator = IronGenerator;
+		Phase2->NeedleProjectile = NeedleProjectile;
+		Phase2->ShootNeedleProb = ShootNeedleProb;
+		Phase2->ShootNeeleDamage = ShootNeeleDamage;
+		Phase2->MassProjectile = MassProjectile;
+		Phase2->ThrowMassProb = ThrowMassProb;
+		Phase2->ThrowMassDamage = ThrowMassDamage;
+		Phase2->GetRootComponent()->SetRelativeScale3D(GetRootComponent()->GetRelativeScale3D());
+		Phase2->FinishSpawning(SpawnTransform);
 	}
-	
 	Destroy();
+}
+
+void ABoss1_Phase1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
+{
+	if (Cast<UFireAttribute>(DataAsset->SkillInfo.Attribute))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("불 히트!"));
+		
+		if (State == EBoss1_State::Tracing)
+		{
+			if (FMath::FRand() * (ShootNeedleProb + ThrowMassProb) < ShootNeedleProb)
+			{
+				ShootNeedleStart();
+			}
+			else
+			{
+				ThrowMassStart();
+			}
+		}
+	}
+	else
+	{
+		
+	}
 }

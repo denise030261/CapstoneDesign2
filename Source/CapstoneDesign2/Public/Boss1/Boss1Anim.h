@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Boss1_Base.h"
 #include "Animation/AnimInstance.h"
 #include "Boss1Anim.generated.h"
 
@@ -38,6 +39,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	float MoveAnimationPlayRate = 1.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	EBoss1_State State;
 	
 	UFUNCTION(BlueprintCallable)
 	bool CanTransitionToMove() const;

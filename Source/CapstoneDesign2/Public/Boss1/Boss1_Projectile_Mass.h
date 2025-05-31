@@ -18,6 +18,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
@@ -26,11 +27,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* MeshComponent;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Particle")
+	UParticleSystem* RemovalParticle;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	class UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float Damage;
+	float Damage = 50.0f;
 	
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

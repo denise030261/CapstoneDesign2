@@ -3,10 +3,13 @@
 
 #include "Boss1/Boss1_Projectile_Needle.h"
 
+#include "Landscape.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Particles/ParticleSystemComponent.h"
 
 class AMainCharacter;
 // Sets default values
@@ -16,23 +19,43 @@ ABoss1_Projectile_Needle::ABoss1_Projectile_Needle()
 	PrimaryActorTick.bCanEverTick = false;
 
 	CollisionComponent = CreateDefaultSubobject<UBoxComponent>(FName("BoxCollider"));
-	CollisionComponent->SetBoxExtent(FVector(50.0f));
-	CollisionComponent->SetRelativeScale3D(FVector(1.0f, 0.1f, 0.1f) * 1.5f);
+	CollisionComponent->SetBoxExtent(FVector(83.0f, 10.0f, 5.0f));
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CollisionComponent->SetRelativeScale3D(FVector(1.0f));
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Needle::OnBeginOverlap);
 	RootComponent = CollisionComponent;
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
-	MeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -50.0f));
+	MeshComponent->SetRelativeLocation(FVector(-87.0f, 0.0f, 0.0f));
+	MeshComponent->SetRelativeRotation(FRotator(90.0f, 90.0f, 0.0f));
+	MeshComponent->SetRelativeScale3D(FVector(2.0f, 0.4f, 2.0f));
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MeshComponent->SetupAttachment(RootComponent);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(TEXT("/Script/Engine.StaticMesh'/Game/Cai_kim_-_Needle.Cai_kim_-_Needle'"));
 	if (MeshAsset.Succeeded()) MeshComponent->SetStaticMesh(MeshAsset.Object);
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> MaterialAsset(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Fab/Megascans/Surfaces/Rusty_Metal_Sheet_tj4kedvcw/Raw/MI_tj4kedvcw.MI_tj4kedvcw'"));
 	if (MaterialAsset.Succeeded()) MeshComponent->SetMaterial(0, MaterialAsset.Object);
+	
+	TrailParticleComponent = CreateDefaultSubobject<UParticleSystemComponent>(FName("TrailParticleSystem"));
+	//TrailParticleComponent->SetRelativeLocation(FVector(-193.0f, 0.0f, 0.0f));
+	//TrailParticleComponent->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+	//TrailParticleComponent->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	TrailParticleComponent->SetRelativeLocation(FVector(-83.0f, 0.0f, 0.0f));
+	TrailParticleComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	TrailParticleComponent->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	TrailParticleComponent->SetupAttachment(RootComponent);
 
+	//static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Stampede_Trail.P_Stampede_Trail'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Grux_Magma_StampedTrail.P_Grux_Magma_StampedTrail'"));
+	//if (TrailParticleAsset.Succeeded()) TrailParticleComponent->SetTemplate(TrailParticleAsset.Object);
+
+
+	
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> RemovalParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_Grux_Magma_Ultimate_Clang.P_Grux_Magma_Ultimate_Clang'"));
+	if (RemovalParticleAsset.Succeeded()) RemovalParticle = RemovalParticleAsset.Object;
+	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 3000.0f; // 초기 속도
 	ProjectileMovement->MaxSpeed = 3000.0f;     // 최대 속도
@@ -50,13 +73,32 @@ void ABoss1_Projectile_Needle::BeginPlay()
 
 }
 
+void ABoss1_Projectile_Needle::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (EndPlayReason == EEndPlayReason::Destroyed)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),             // 월드 포인터
+			RemovalParticle,      // 파티클 시스템 에셋
+			GetActorLocation(),               // 소환할 위치
+			GetActorRotation(),               // 회전
+			FVector(1.0f),                  // 스케일
+			true                    // 자동 소멸 여부 (파티클이 끝나면 사라짐)
+		);
+	}
+}
+
 void ABoss1_Projectile_Needle::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor != this) // 자신과의 겹침을 방지
 	{
 		if (AMainCharacter* Player = Cast<AMainCharacter>(OtherActor))
 		{
-			// Damage to Player
+			Player->SetCharacterHP(-Damage);
+			Destroy();
+		}
+		else if (OtherActor->IsA(ALandscape::StaticClass()))
+		{
 			Destroy();
 		}
 	}

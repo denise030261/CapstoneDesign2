@@ -6,6 +6,7 @@
 #include "EngineUtils.h"
 #include "Boss1/Boss1_Phase1.h"
 #include "CapstoneDesign2/MainCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -42,12 +43,12 @@ FRotator UBoss1GameModeHelper::FindBossSpawnRotation() const
 
 FRotator UBoss1GameModeHelper::FindPlayerSpawnRotation() const
 {
-	const FVector BossLocation = FindBossSpawnLocation();
-	const FVector PlayerLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
+	const FVector BossLocation = FindBossSpawnLocation() - GetWorld()->GetFirstPlayerController()->GetCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	const FVector PlayerLocation = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation() + GetWorld()->GetFirstPlayerController()->GetCharacter()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
 	const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(PlayerLocation, BossLocation);
-	
-	return FRotator(0.0f, LookAt.Yaw, 0.0f);
+
+	return FRotator(-LookAt.Pitch, LookAt.Yaw, 0.0f);
 }
 
 ABoss1_Phase1* UBoss1GameModeHelper::GenerateBoss1(FVector SpawnLocation, FRotator SpawnRotation)
@@ -61,7 +62,7 @@ ABoss1_Phase1* UBoss1GameModeHelper::GenerateBoss1(FVector SpawnLocation, FRotat
 	}
 	else
 	{
-		return GenerateBoss1(SpawnLocation, SpawnRotation);
+		return nullptr;
 	}
 }
 
@@ -76,4 +77,14 @@ void UBoss1GameModeHelper::SetStage()
 	
 	GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorRotation(PlayerRotation);
 	GetWorld()->GetFirstPlayerController()->GetPawn()->GetController()->SetControlRotation(PlayerRotation);
+	GetWorld()->GetFirstPlayerController()->GetPawn()->AddControllerPitchInput(PlayerRotation.Pitch * 10.0f);
+
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+	{
+		AActor* CurrentActor  = *It;
+		if (CurrentActor && CurrentActor->GetClass() == SpawnPointActor.Get())
+		{
+			CurrentActor->Destroy();
+		}
+	}
 }

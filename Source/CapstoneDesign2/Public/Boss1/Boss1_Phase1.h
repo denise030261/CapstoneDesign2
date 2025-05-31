@@ -37,17 +37,22 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Property")
 	TSubclassOf<ABoss1_Phase2> Boss1_Phase2ToSpawn = ABoss1_Phase2::StaticClass();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pattern|Iron")
-	int32 MaxIronCount = 5;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* SpawnMontage;
 	
 	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
+	UFUNCTION()
+	virtual void DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset) override;
+	
 private:
 	virtual void CheckState(float DeltaTime) override;
 
 	virtual void Trace(float DeltaTime) override;
-
+	
+	virtual void EndEatIron() override;
+	
 	virtual void ShootNeedle() override;
 	
 	void SetToPhase2();

@@ -3,9 +3,12 @@
 
 #include "Boss1/Boss1_Projectile_Mass.h"
 
+#include "Landscape.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Engine/StaticMeshActor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceConstant.h"
 
 // Sets default values
@@ -33,6 +36,9 @@ ABoss1_Projectile_Mass::ABoss1_Projectile_Mass()
 	
 	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> MaterialAsset(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Fab/Megascans/Surfaces/Rusty_Metal_Sheet_tj4kedvcw/Raw/MI_tj4kedvcw.MI_tj4kedvcw'"));
 	if (MaterialAsset.Succeeded()) MeshComponent->SetMaterial(0, MaterialAsset.Object);
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> RemovalParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_Grux_Magma_Ultimate_Clang.P_Grux_Magma_Ultimate_Clang'"));
+	if (RemovalParticleAsset.Succeeded()) RemovalParticle = RemovalParticleAsset.Object;
 	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 1000.0f; // 초기 속도
@@ -51,6 +57,20 @@ void ABoss1_Projectile_Mass::BeginPlay()
 
 }
 
+void ABoss1_Projectile_Mass::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (EndPlayReason == EEndPlayReason::Destroyed)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),             // 월드 포인터
+			RemovalParticle,      // 파티클 시스템 에셋
+			GetActorLocation(),               // 소환할 위치
+			GetActorRotation(),               // 회전
+			FVector(1.0f),                  // 스케일
+			true                    // 자동 소멸 여부 (파티클이 끝나면 사라짐)
+		);
+	}
+}
 
 void ABoss1_Projectile_Mass::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -58,7 +78,11 @@ void ABoss1_Projectile_Mass::OnBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	{
 		if (AMainCharacter* Player = Cast<AMainCharacter>(OtherActor))
 		{
-			// Damage to Player
+			Player->SetCharacterHP(-Damage);
+			Destroy();
+		}
+		else if (OtherActor->IsA(ALandscape::StaticClass()))
+		{
 			Destroy();
 		}
 	}
