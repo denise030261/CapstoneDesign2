@@ -13,6 +13,8 @@ class ACapstoneDesign2GameMode : public AGameModeBase
 
 public:
 	ACapstoneDesign2GameMode();
+
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 };
 
 
