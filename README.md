@@ -3,7 +3,8 @@
 
 
 ### Big Assets
-- Pragon: Grux [[Link]](https://www.fab.com/ko/listings/8c4bac2c-f7f7-4632-a644-47f4e104f5d8)
+- Paragon: Grux [[Link]](https://www.fab.com/ko/listings/8c4bac2c-f7f7-4632-a644-47f4e104f5d8)
+- Paragon: Countess [[Link]](https://www.fab.com/ko/listings/0bf014eb-f2ed-4029-adda-81a855eb5220)
 
 - Metal Pot [[Link]](https://www.fab.com/ko/listings/703d6b2b-786b-4716-81ab-545b797fc1a7)
 - Old Metal Jug [[Link]](https://www.fab.com/ko/listings/cd7d2302-8441-4ec1-8e03-cc473502b4f7)
