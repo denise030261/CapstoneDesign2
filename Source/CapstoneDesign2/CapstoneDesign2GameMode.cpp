@@ -4,6 +4,7 @@
 #include "System/MyGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerStart.h"
 
 AActor* ACapstoneDesign2GameMode::ChoosePlayerStart_Implementation(AController* Player)
@@ -38,4 +39,30 @@ ACapstoneDesign2GameMode::ACapstoneDesign2GameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+}
+
+void ACapstoneDesign2GameMode::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (UIClass)
+    {
+        UUserWidget* CreatedUI = CreateWidget<UUserWidget>(GetWorld(), UIClass);
+        if (CreatedUI)
+        {
+            CreatedUI->AddToViewport();
+            CreatedUI->SetVisibility(ESlateVisibility::Visible);
+            SavedUI = CreatedUI;
+        }
+    }
+}
+
+void ACapstoneDesign2GameMode::SetSavedUI(UUserWidget* InUI)
+{
+    SavedUI = InUI;
+}
+
+UUserWidget* ACapstoneDesign2GameMode::GetSavedUI() const
+{
+    return SavedUI;
 }
