@@ -39,6 +39,7 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		UE_LOG(LogTemp, Warning, TEXT("Detect Player"));
 		return;
 	}
+	//else if(ActorHasTag(""))
 	
 	if (TalismanDataAsset->SkillInfo.Skill)
 	{

@@ -56,6 +56,8 @@ AMainCharacter::AMainCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	bNoDamage = false;
+	CurAttribute = "Normal";
 }
 
 void AMainCharacter::BeginPlay()
@@ -87,6 +89,8 @@ void AMainCharacter::BeginPlay()
 			PC->SetInputMode(FInputModeGameOnly());
 		}
 	}
+
+	SetActorTickEnabled(false);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -117,13 +121,19 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 
 		// Attack
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMainCharacter::Attack);
+		EnhancedInputComponent->BindAction(CloseAttackAction, ETriggerEvent::Started, this, &AMainCharacter::CloseAttack);
+		EnhancedInputComponent->BindAction(RangedAttackAction, ETriggerEvent::Started, this, &AMainCharacter::RangedAttack);
+		EnhancedInputComponent->BindAction(MoveAttackAction, ETriggerEvent::Started, this, &AMainCharacter::MoveAttack);
+		EnhancedInputComponent->BindAction(BallAttackAction, ETriggerEvent::Started, this, &AMainCharacter::BallAttack);
+		EnhancedInputComponent->BindAction(SpecialAttackAction, ETriggerEvent::Started, this, &AMainCharacter::SpecialAttack);
+		EnhancedInputComponent->BindAction(GodAttackAction, ETriggerEvent::Started, this, &AMainCharacter::GodAttack);
 	}
 
 }
 
 void AMainCharacter::Move(const FInputActionValue& Value)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Moving"));
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -160,11 +170,141 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AMainCharacter::Attack(const FInputActionValue& Value)
+void AMainCharacter::CloseAttack(const FInputActionValue& Value)
 {
+	if (CurAttribute == "Normal")
+	{
+		if (NormalTalismans[0])
+			Talisman = NormalTalismans[0];
+		else
+			return;
+	}
+	else
+	{
+		if (FireTalismans[0])
+			Talisman = FireTalismans[0];
+		else
+			return;
+	}
+
+	Attack();
+}
+
+void AMainCharacter::RangedAttack(const FInputActionValue& Value)
+{
+	DisableInput(PC);
+
+	if (CurAttribute == "Normal")
+	{
+		if (NormalTalismans[1])
+			Talisman = NormalTalismans[1];
+		else
+			return;
+	}
+	else
+	{
+		if (FireTalismans[1])
+			Talisman = FireTalismans[1];
+		else
+			return;
+	}
+
+	Attack();
+}
+
+void AMainCharacter::MoveAttack(const FInputActionValue& Value)
+{
+	DisableInput(PC);
+
+	if (CurAttribute == "Normal")
+	{
+		if (NormalTalismans[2])
+			Talisman = NormalTalismans[2];
+		else
+			return;
+	}
+	else
+	{
+		if (FireTalismans[2])
+			Talisman = FireTalismans[2];
+		else
+			return;
+	}
+
+	Attack();
+}
+
+void AMainCharacter::BallAttack(const FInputActionValue& Value)
+{
+	DisableInput(PC);
+
+	if (CurAttribute == "Normal")
+	{
+		if (NormalTalismans[3])
+			Talisman = NormalTalismans[3];
+		else
+			return;
+	}
+	else
+	{
+		if (FireTalismans[3])
+			Talisman = FireTalismans[3];
+		else
+			return;
+	}
+
+	Attack();
+}
+
+void AMainCharacter::SpecialAttack(const FInputActionValue& Value)
+{
+	DisableInput(PC);
+
+	if (CurAttribute == "Normal")
+	{
+		return;
+	}
+	else
+	{
+		if (FireTalismans[4])
+			Talisman = FireTalismans[4];
+		else
+			return;
+	}
+
+	Attack();
+}
+
+void AMainCharacter::GodAttack(const FInputActionValue& Value)
+{
+	DisableInput(PC);
+
+	if (CurAttribute == "Normal")
+	{
+		return;
+	}
+	else
+	{
+		if (FireTalismans[5])
+			Talisman = FireTalismans[5];
+		else
+			return;
+	}
+
+	Attack();
+}
+
+void AMainCharacter::Attack()
+{
+	if (bNoDamage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Damage"));
+		return;
+	}
+
 	if (AnimInst && !bAttack)
 	{
-		DisableInput(PC);
+		UE_LOG(LogTemp, Warning, TEXT("Attack"));
 		bAttack = true;
 		FRotator YawRotation(0, GetActorRotation().Yaw, 0);
 		ThrowRotation = YawRotation;
@@ -333,7 +473,14 @@ void AMainCharacter::SetCharacterHP(int Num)
 		return;
 	}
 
+	if (bNoDamage)
+	{
+		return;
+	}
+
 	float Stun = 0;
+	DisableInput(PC);
+	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	if (HP <= 0)
 	{
 		DamageLevel = 3;
@@ -357,29 +504,29 @@ void AMainCharacter::SetCharacterHP(int Num)
 		Stun = 5;
 	} // Fall Down
 
-	this->DisableInput(PC);
 	if (DamageMontages[DamageLevel])
 	{
 		AnimInst->Montage_Play(DamageMontages[DamageLevel]);
 	}
+	bNoDamage = true;
 
 	FTimerHandle StunTimerHandle;
 	FTimerDelegate StunDelegate;
 	StunDelegate.BindUObject(this, &AMainCharacter::EnableMovement);
 	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, StunDelegate, Stun, false);
-	// bool variable -> SetHp But Not Stun
 }
 
 void AMainCharacter::EnableMovement()
 {
+	bNoDamage = false;
+
+	UE_LOG(LogTemp, Warning, TEXT("Enable Input"));
 	if (DamageLevel==2)
 	{
-		// Get Up Animation
 		AnimInst->Montage_Play(GetupMontage);
 		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
 		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, GetupMontage);
-
-		//return;
+		return;
 	}
 	else if (DamageLevel == 3)
 	{
