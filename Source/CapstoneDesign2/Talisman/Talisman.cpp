@@ -7,6 +7,7 @@
 #include "FireAttribute.h"
 #include "NormalAttribute.h"
 #include "MoveSkill.h"
+#include <Damageable.h>
 
 // Sets default values
 ATalisman::ATalisman()
@@ -34,12 +35,22 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 {
 	SetActorTickEnabled(false); // Don't Tick
 
+	bool bTarget = false;
+
 	if (ActorHasTag("Player"))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Detect Player"));
 		return;
 	}
-	//else if(ActorHasTag(""))
+	if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
+	{
+		IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);
+		if (InterfaceRef)
+		{
+			InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
+			bTarget = true;
+		}
+	}
+
 	
 	if (TalismanDataAsset->SkillInfo.Skill)
 	{
@@ -47,8 +58,6 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 
 		UTalismanSkillStrategy* SkillCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
 		UTalismanAttributeStrategy* AttributeCDO = TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>();
-
-		AttributeCDO->Attack(GetWorld(), OtherActor, this);
 
 		if (URangeAttack* RangeAttackCDO = Cast<URangeAttack>(SkillCDO))
 		{
@@ -67,12 +76,12 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		{
 			MoveSKillCDO->Moving(GetActorLocation(),GetWorld()->GetFirstPlayerController()->GetCharacter(),this, GetWorld());
 		}
+
+		if (bTarget)
+			AttributeCDO->Attack(GetWorld(), OtherActor, this);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Destroy"));
 	Destroy();
-	//Other Actor가 본인 캐릭터 외에 감지되면 파괴 적이면 데미지 입히기
-	// 범위 공격은 범위를 스폰
 }
 
 void ATalisman::SetMoveDistance(FVector3d StartLocation)

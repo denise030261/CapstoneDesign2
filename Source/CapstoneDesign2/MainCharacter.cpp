@@ -56,8 +56,6 @@ AMainCharacter::AMainCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
-	bNoDamage = false;
-	CurAttribute = "Normal";
 }
 
 void AMainCharacter::BeginPlay()
@@ -65,6 +63,10 @@ void AMainCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 	InitCharacterHP();
+
+	bNoDamage = false;
+	CurAttribute = "Normal";
+	SelectedTalismanDataAsset = NormalTalismanAssets[0];
 
 	AnimInst = GetMesh()->GetAnimInstance();
 	if (AnimInst)
@@ -174,17 +176,23 @@ void AMainCharacter::CloseAttack(const FInputActionValue& Value)
 {
 	if (CurAttribute == "Normal")
 	{
-		if (NormalTalismans[0])
-			Talisman = NormalTalismans[0];
+		if (NormalTalismanAssets[0])
+			SelectedTalismanDataAsset = NormalTalismanAssets[0];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 	else
 	{
-		if (FireTalismans[0])
-			Talisman = FireTalismans[0];
+		if (FireTalismanAssets[0])
+			SelectedTalismanDataAsset = FireTalismanAssets[0];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 
 	Attack();
@@ -196,17 +204,23 @@ void AMainCharacter::RangedAttack(const FInputActionValue& Value)
 
 	if (CurAttribute == "Normal")
 	{
-		if (NormalTalismans[1])
-			Talisman = NormalTalismans[1];
+		if (NormalTalismanAssets[1])
+			SelectedTalismanDataAsset = NormalTalismanAssets[1];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 	else
 	{
-		if (FireTalismans[1])
-			Talisman = FireTalismans[1];
+		if (FireTalismanAssets[1])
+			SelectedTalismanDataAsset = FireTalismanAssets[1];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 
 	Attack();
@@ -218,17 +232,23 @@ void AMainCharacter::MoveAttack(const FInputActionValue& Value)
 
 	if (CurAttribute == "Normal")
 	{
-		if (NormalTalismans[2])
-			Talisman = NormalTalismans[2];
+		if (NormalTalismanAssets[2])
+			SelectedTalismanDataAsset = NormalTalismanAssets[2];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 	else
 	{
-		if (FireTalismans[2])
-			Talisman = FireTalismans[2];
+		if (FireTalismanAssets[2])
+			SelectedTalismanDataAsset = FireTalismanAssets[2];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 
 	Attack();
@@ -240,17 +260,23 @@ void AMainCharacter::BallAttack(const FInputActionValue& Value)
 
 	if (CurAttribute == "Normal")
 	{
-		if (NormalTalismans[3])
-			Talisman = NormalTalismans[3];
+		if (NormalTalismanAssets[3])
+			SelectedTalismanDataAsset = NormalTalismanAssets[3];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 	else
 	{
-		if (FireTalismans[3])
-			Talisman = FireTalismans[3];
+		if (FireTalismanAssets[3])
+			SelectedTalismanDataAsset = FireTalismanAssets[3];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 
 	Attack();
@@ -262,14 +288,18 @@ void AMainCharacter::SpecialAttack(const FInputActionValue& Value)
 
 	if (CurAttribute == "Normal")
 	{
+		EnableInput(PC);
 		return;
 	}
 	else
 	{
-		if (FireTalismans[4])
-			Talisman = FireTalismans[4];
+		if (FireTalismanAssets[4])
+			SelectedTalismanDataAsset = FireTalismanAssets[4];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 
 	Attack();
@@ -281,14 +311,18 @@ void AMainCharacter::GodAttack(const FInputActionValue& Value)
 
 	if (CurAttribute == "Normal")
 	{
+		EnableInput(PC);
 		return;
 	}
 	else
 	{
-		if (FireTalismans[5])
-			Talisman = FireTalismans[5];
+		if (FireTalismanAssets[5])
+			SelectedTalismanDataAsset = FireTalismanAssets[5];
 		else
+		{
+			EnableInput(PC);
 			return;
+		}
 	}
 
 	Attack();
@@ -298,13 +332,11 @@ void AMainCharacter::Attack()
 {
 	if (bNoDamage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Damage"));
 		return;
 	}
 
 	if (AnimInst && !bAttack)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Attack"));
 		bAttack = true;
 		FRotator YawRotation(0, GetActorRotation().Yaw, 0);
 		ThrowRotation = YawRotation;
@@ -313,6 +345,7 @@ void AMainCharacter::Attack()
 			return;
 
 		ATalisman* TalismanObject = NewObject<ATalisman>(GetTransientPackage() /*or owner, or whatever */, *Talisman);
+		TalismanObject->TalismanDataAsset = SelectedTalismanDataAsset;
 
 		if(TalismanObject->TalismanDataAsset->SkillInfo.Attribute)
 			if (UPassiveSkill* PassiveObjecet = Cast<UPassiveSkill>(TalismanObject->TalismanDataAsset->SkillInfo.Attribute))
@@ -403,6 +436,8 @@ void AMainCharacter::ThrowTalisman()
 
 	if (TalismanInstance == nullptr)
 		return;
+
+	TalismanInstance->TalismanDataAsset = SelectedTalismanDataAsset;
 
 	TalismanInstance->SetMoveDistance(ThrowLocation + ForwardDirection * TalismanInstance->TalismanDataAsset->SkillInfo.Distance);
 

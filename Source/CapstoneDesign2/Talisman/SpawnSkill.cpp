@@ -2,6 +2,8 @@
 
 #include "SpawnSkill.h"
 #include "NiagaraComponent.h"
+#include <Damageable.h>
+#include "Talisman.h"
 
 // Sets default values
 ASpawnSkill::ASpawnSkill()
@@ -58,18 +60,58 @@ void ASpawnSkill::Tick(float DeltaTime)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Arrived, Destroying"));
 		Destroy();
 	}
-} 
+}
 
 void ASpawnSkill::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// Enemy Damage
+	if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
+	{
+		RepeatAttack(OtherActor);
+
+		FTimerDelegate AttackDelegate;
+		AttackDelegate.BindUFunction(this, FName("RepeatAttack"), OtherActor);
+		GetWorld()->GetTimerManager().SetTimer(AttackHandle, AttackDelegate, StayTime, false);
+	}
+}
+
+void ASpawnSkill::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);
+	if (InterfaceRef)
+	{
+		if (TalismanDataAsset)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s Done Attack"), *GetName());
+			GetWorld()->GetTimerManager().ClearTimer(AttackHandle);
+		}
+	}
+}
+
+void ASpawnSkill::RepeatAttack(AActor* OtherActor)
+{
+	IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);
+	if (InterfaceRef)
+	{
+		if (TalismanDataAsset)
+		{
+			InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No TalismanDataAsset"));
+		}
+	}
 }
 
 void ASpawnSkill::SpawnMove(FVector3d StartLocation)
 {
 	TargetDistance = StartLocation;
 	SetActorTickEnabled(true);
+}
+
+void ASpawnSkill::SetTalisman(ATalisman* Talisman)
+{
+	OwnTalisman = Talisman;
 }

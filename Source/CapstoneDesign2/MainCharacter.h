@@ -99,11 +99,11 @@ public:
 
 	// All Normal Talismans
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talisman")
-	TArray<TSubclassOf<ATalisman>> NormalTalismans;
+	TArray<UTalismanDataAsset*> NormalTalismanAssets;
 
 	// All Fire Talismans
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talisman")
-	TArray<TSubclassOf<ATalisman>> FireTalismans;
+	TArray<UTalismanDataAsset*> FireTalismanAssets;
 
 	UFUNCTION()
 	int32 GetCharacterHP() { return HP; }
@@ -195,4 +195,6 @@ private:
 	void EnableMovement();
 
 	bool bNoDamage = false;
+
+	UTalismanDataAsset* SelectedTalismanDataAsset;
 };
