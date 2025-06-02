@@ -17,11 +17,6 @@
 // Sets default values
 AMonster1::AMonster1()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-	GetCharacterMovement()->bOrientRotationToMovement = true; // 이동 방향으로 Yaw 회전
-	GetCharacterMovement()->bUseControllerDesiredRotation = false; // 컨트롤러의 회전 반영 비활성화
 	GetCharacterMovement()->MaxWalkSpeed = 150.0f;
 	
 	GetCapsuleComponent()->SetCapsuleHalfHeight(82.0f);
@@ -34,13 +29,7 @@ AMonster1::AMonster1()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -82.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
-	MonsterUI = CreateDefaultSubobject<UWidgetComponent>(FName("MonsterUI"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> UIBlueprint(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/CapstoneDesign/Blueprints/Monster/BP_MonsterUI.BP_MonsterUI_C'"));
-	if (UIBlueprint.Succeeded()) MonsterUI->SetWidgetClass(UIBlueprint.Class);
-	MonsterUI->SetWidgetSpace(EWidgetSpace::World);
-	MonsterUI->SetBlendMode(EWidgetBlendMode::Transparent);
 	MonsterUI->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
-	MonsterUI->SetupAttachment(RootComponent);
 	
 	WeaponColliderR = CreateDefaultSubobject<USphereComponent>(FName("Weapon Collider R"));
 	WeaponColliderR->OnComponentBeginOverlap.AddDynamic(this, &AMonster1::OnWeaponOverlapBegin);
@@ -57,6 +46,9 @@ AMonster1::AMonster1()
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimDieMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Monster/Monster1/AM_Monster1_Die.AM_Monster1_Die'"));
 	if (AnimDieMontage.Succeeded()) DieMontage = AnimDieMontage.Object;
+
+	Name = TEXT("이름뭘로하지");
+	MaxHp = 150.0f;
 }
 
 // Called when the game starts or when spawned
@@ -64,19 +56,9 @@ void AMonster1::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SpawnDefaultController();
-
-	NowHp = MaxHp;
-
-	if (GetWorld()->GetFirstPlayerController())
-		PlayerCharacter = Cast<AMainCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	
 	AnimInstance = Cast<UMonster1Anim>(GetMesh()->GetAnimInstance());
 	Cast<UMonster1Anim>(GetMesh()->GetAnimInstance())->OnAttackEndNotify.AddDynamic(this, &AMonster1::EndAttack);
-	
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetMonsterName(TEXT("이름뭘로하지"));
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetMaxHp(MaxHp);
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
+	Cast<UMonster1Anim>(GetMesh()->GetAnimInstance())->OnDieEndNotify.AddDynamic(this, &AMonster1::EndDie);
 }
 
 // Called every frame
@@ -86,8 +68,6 @@ void AMonster1::Tick(float DeltaTime)
 
 	CheckState(DeltaTime);
 	UpdateWeaponColliders();
-	UpdateAnimInstance();
-	UpdateUI();
 }
 
 void AMonster1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
@@ -99,11 +79,7 @@ void AMonster1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAss
 			DamageAmount *= 1.5f;
 		}
 	
-		NowHp = FMath::Clamp(NowHp - DamageAmount, 0.0f, MaxHp);
-		if (NowHp <= 0)
-		{
-			SetDie();
-		}
+		Super::DealDamage(DamageAmount, DataAsset);
 	}
 }
 
@@ -151,6 +127,7 @@ void AMonster1::IdleTransition()
 void AMonster1::StartGaze()
 {
 	State = EMonster1_State::Gaze;
+	
 	GetWorldTimerManager().SetTimer(GazeHandle, [&]
 	{
 		State = EMonster1_State::Trace;
@@ -209,30 +186,6 @@ void AMonster1::EndAttack()
 	State = EMonster1_State::Idle;
 }
 
-float AMonster1::CalcDistance() const
-{
-	const FVector StartPos = GetActorLocation();
-	const FVector EndPos = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
-
-	return (StartPos - EndPos).Size();
-}
-
-FRotator AMonster1::CalcSmoothLookAtRotation(const FVector& Location, const float DeltaTime) const
-{
-	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location);
-	TargetRotation.Pitch = 0.0f;
-	TargetRotation.Roll = 0.0f;
-	const FRotator SmoothRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 10.0f);
-
-	return SmoothRotation;
-}
-
-void AMonster1::Gaze(const float DeltaTime)
-{
-	const FRotator SmoothRotation = CalcSmoothLookAtRotation(PlayerCharacter->GetActorLocation(), DeltaTime);
-
-	SetActorRotation(SmoothRotation);
-}
 
 void AMonster1::UpdateWeaponColliders() const
 {
@@ -253,16 +206,16 @@ void AMonster1::UpdateAnimInstance() const
 	AnimInstance->AnimState = State;
 }
 
-void AMonster1::UpdateUI() const
-{
-	const FVector CameraLocation = PlayerCharacter->GetFollowCamera()->GetComponentLocation();
-	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(MonsterUI->GetComponentLocation(), CameraLocation);
-
-	MonsterUI->SetWorldRotation(LookAtRotation);
-}
-
 void AMonster1::SetDie()
 {
 	State = EMonster1_State::Die;
 	GetMesh()->GetAnimInstance()->Montage_Play(DieMontage);
+	GetWorldTimerManager().ClearTimer(AttackReadyHandle);
+	GetWorldTimerManager().ClearTimer(GazeHandle);
+	CanDamageAttack = false;
+}
+
+void AMonster1::EndDie()
+{
+	Destroy();
 }

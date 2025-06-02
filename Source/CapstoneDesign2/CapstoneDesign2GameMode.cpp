@@ -33,9 +33,9 @@ AActor* ACapstoneDesign2GameMode::ChoosePlayerStart_Implementation(AController* 
 ACapstoneDesign2GameMode::ACapstoneDesign2GameMode()
 {
 	// set default pawn class to our Blueprinted character
-	/*static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Script/Engine.Blueprint'/Game/CapstoneDesign/Blueprints/BP_MainCharacter.BP_MainCharacter_C'"));
-	if (PlayerPawnBPClass.Class != NULL)
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Script/Engine.Blueprint'/Game/CapstoneDesign/Blueprints/BP_MainCharacter.BP_MainCharacter_C'"));
+	if (PlayerPawnBPClass.Succeeded())
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}*/
+	}
 }

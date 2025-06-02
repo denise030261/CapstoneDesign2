@@ -13,4 +13,7 @@ void UMonster0Anim::AnimNotify_AttackEndNotify() const
 	OnAttackEndNotify.Broadcast();
 }
 
-
+void UMonster0Anim::AnimNotify_DieEndNotify() const
+{
+	OnDieEndNotify.Broadcast();
+}
