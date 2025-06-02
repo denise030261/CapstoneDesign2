@@ -50,6 +50,9 @@ void AMonsterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!PlayerCharacter && GetWorld()->GetFirstPlayerController())
+		PlayerCharacter = Cast<AMainCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	
 	UpdateAnimInstance();
 	UpdateUI();
 }
@@ -67,10 +70,16 @@ void AMonsterBase::DealDamage(float DamageAmount, const UTalismanDataAsset* Data
 
 void AMonsterBase::UpdateUI() const
 {
-	const FVector CameraLocation = PlayerCharacter->GetFollowCamera()->GetComponentLocation();
-	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(MonsterUI->GetComponentLocation(), CameraLocation);
+	if (PlayerCharacter)
+	{
+		const FVector CameraLocation = PlayerCharacter->GetFollowCamera()->GetComponentLocation();
+		const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(MonsterUI->GetComponentLocation(), CameraLocation);
 
-	MonsterUI->SetWorldRotation(LookAtRotation);
+		MonsterUI->SetWorldRotation(LookAtRotation);
+	}
+	else
+	{
+	}
 }
 
 void AMonsterBase::UpdateAnimInstance() const
@@ -101,7 +110,10 @@ FRotator AMonsterBase::CalcSmoothLookAtRotation(const FVector& Location, const f
 
 void AMonsterBase::Gaze(const float DeltaTime)
 {
-	const FRotator SmoothRotation = CalcSmoothLookAtRotation(PlayerCharacter->GetActorLocation(), DeltaTime);
+	if (PlayerCharacter)
+	{
+		const FRotator SmoothRotation = CalcSmoothLookAtRotation(PlayerCharacter->GetActorLocation(), DeltaTime);
 
-	SetActorRotation(SmoothRotation);
+		SetActorRotation(SmoothRotation);
+	}
 }

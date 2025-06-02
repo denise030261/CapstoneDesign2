@@ -74,7 +74,7 @@ void AMonster1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAss
 {
 	if (State != EMonster1_State::Die)
 	{
-		if (Cast<UFireAttribute>(DataAsset->SkillInfo.Attribute))
+		if (FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName())
 		{
 			DamageAmount *= 1.5f;
 		}
