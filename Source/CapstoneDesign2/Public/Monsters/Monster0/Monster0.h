@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Damageable.h"
 #include "GameFramework/Character.h"
+#include "Monsters/MonsterBase.h"
 #include "Monster0.generated.h"
 
 class UWidgetComponent;
@@ -20,7 +21,7 @@ enum class EMonster0_State : uint8
 };
 
 UCLASS()
-class CAPSTONEDESIGN2_API AMonster0 : public ACharacter, public IDamageable
+class CAPSTONEDESIGN2_API AMonster0 : public AMonsterBase
 {
 	GENERATED_BODY()
 
@@ -41,23 +42,11 @@ public:
 	UFUNCTION()
 	virtual void OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UWidgetComponent> MonsterUI;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UBoxComponent* WeaponColliderL;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EMonster0_State State = EMonster0_State::Idle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
-	AMainCharacter* PlayerCharacter;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float MaxHp = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float NowHp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float AttackDamage = 5.0f;
@@ -90,10 +79,9 @@ private:
 	UFUNCTION()
 	void EndAttack();
 	
-	FRotator CalcSmoothLookAtRotation(const FVector& Location, const float DeltaTime) const;
-	void Gaze(const float DeltaTime);
-
-	void UpdateUI() const;
 	void UpdateWeaponColliders() const;
-	void SetDie();
+	virtual void SetDie() override;
+
+	UFUNCTION()
+	void EndDie();
 };

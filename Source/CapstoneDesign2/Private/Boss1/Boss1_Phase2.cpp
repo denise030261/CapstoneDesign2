@@ -324,7 +324,7 @@ void ABoss1_Phase2::SetDie()
 
 void ABoss1_Phase2::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
-	if (Cast<UFireAttribute>(DataAsset->SkillInfo.Attribute))
+	if (FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("불 히트!"));
 

@@ -17,12 +17,6 @@
 // Sets default values
 AMonster0::AMonster0()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-	GetCharacterMovement()->bOrientRotationToMovement = true; // 이동 방향으로 Yaw 회전
-	GetCharacterMovement()->bUseControllerDesiredRotation = false; // 컨트롤러의 회전 반영 비활성화
-	
 	GetCapsuleComponent()->SetCapsuleHalfHeight(90.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(20.0f);
 	GetCapsuleComponent()->SetRelativeScale3D(FVector(1.2f));
@@ -33,13 +27,7 @@ AMonster0::AMonster0()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -90.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
-	MonsterUI = CreateDefaultSubobject<UWidgetComponent>(FName("MonsterUI"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> UIBlueprint(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/CapstoneDesign/Blueprints/Monster/BP_MonsterUI.BP_MonsterUI_C'"));
-	if (UIBlueprint.Succeeded()) MonsterUI->SetWidgetClass(UIBlueprint.Class);
-	MonsterUI->SetWidgetSpace(EWidgetSpace::World);
-	MonsterUI->SetBlendMode(EWidgetBlendMode::Transparent);
 	MonsterUI->SetRelativeLocation(FVector(0.0f, 0.0f, 110.0f));
-	MonsterUI->SetupAttachment(RootComponent);
 	
 	WeaponColliderL = CreateDefaultSubobject<UBoxComponent>(FName("Weapon Collider L"));
 	WeaponColliderL->OnComponentBeginOverlap.AddDynamic(this, &AMonster0::OnWeaponOverlapBegin);
@@ -56,6 +44,9 @@ AMonster0::AMonster0()
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimDieMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Monster/Monster0/AM_Monster0_Die.AM_Monster0_Die'"));
 	if (AnimDieMontage.Succeeded()) DieMontage = AnimDieMontage.Object;
+
+	Name = TEXT("요괴");
+	MaxHp = 100.0f;
 }
 
 
@@ -64,19 +55,9 @@ void AMonster0::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SpawnDefaultController();
-
-	NowHp = MaxHp;
-
-	if (GetWorld()->GetFirstPlayerController())
-		PlayerCharacter = Cast<AMainCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnCanDamageAttackEndNotify.AddDynamic(this, &AMonster0::EndCanDamageAttack);
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnAttackEndNotify.AddDynamic(this, &AMonster0::EndAttack);
-
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetMonsterName(TEXT("요괴"));
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetMaxHp(MaxHp);
-	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
+	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnDieEndNotify.AddDynamic(this, &AMonster0::EndDie);
 }
 
 // Called every frame
@@ -93,13 +74,7 @@ void AMonster0::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAss
 {
 	if (State != EMonster0_State::Die)
 	{
-		NowHp = FMath::Clamp(NowHp - DamageAmount, 0.0f, MaxHp);
-		Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
-
-		if (NowHp <= 0)
-		{
-			SetDie();
-		}
+		Super::DealDamage(DamageAmount, DataAsset);
 	}
 }
 
@@ -166,32 +141,6 @@ void AMonster0::EndAttack()
 	State = EMonster0_State::Idle;
 }
 
-FRotator AMonster0::CalcSmoothLookAtRotation(const FVector& Location, const float DeltaTime) const
-{
-	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location);
-	TargetRotation.Pitch = 0.0f;
-	TargetRotation.Roll = 0.0f;
-	const FRotator SmoothRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 10.0f);
-
-	return SmoothRotation;
-}
-
-void AMonster0::Gaze(const float DeltaTime)
-{
-	const FRotator SmoothRotation = CalcSmoothLookAtRotation(PlayerCharacter->GetActorLocation(), DeltaTime);
-
-	SetActorRotation(SmoothRotation);
-}
-
-void AMonster0::UpdateUI() const
-{
-	const FVector CameraLocation = PlayerCharacter->GetFollowCamera()->GetComponentLocation();
-	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(MonsterUI->GetComponentLocation(), CameraLocation);
-
-	MonsterUI->SetWorldRotation(LookAtRotation);
-}
-
-
 void AMonster0::UpdateWeaponColliders() const
 {
 	const FVector WeaponLStartPos = GetMesh()->GetSocketLocation(FName("FX_WeaponBase_L"));
@@ -215,4 +164,11 @@ void AMonster0::SetDie()
 {
 	State = EMonster0_State::Die;
 	GetMesh()->GetAnimInstance()->Montage_Play(DieMontage);
+	GetWorldTimerManager().ClearTimer(AttackReadyHandle);
+	CanDamageAttack = false;
+}
+
+void AMonster0::EndDie()
+{
+	Destroy();
 }

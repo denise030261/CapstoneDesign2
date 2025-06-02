@@ -17,8 +17,6 @@ class CAPSTONEDESIGN2_API UMonster1Anim : public UAnimInstance
 	GENERATED_BODY()
 	
 public:
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float AnimMoveSpeed;
 
@@ -30,4 +28,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Animation Notifies")
 	FOnAttackEndNotify OnAttackEndNotify;
+
+	UFUNCTION()
+	void AnimNotify_DieEndNotify() const;
+
+	UPROPERTY(BlueprintAssignable, Category = "Animation Notifies")
+	FOnDieEndNotify OnDieEndNotify;
 };

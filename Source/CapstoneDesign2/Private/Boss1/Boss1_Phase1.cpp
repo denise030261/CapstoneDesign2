@@ -8,6 +8,7 @@
 #include "Boss1/Boss1_Projectile_Needle.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "CapstoneDesign2/Talisman/FireAttribute.h"
+#include "CapstoneDesign2/Talisman/NormalAttribute.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -155,7 +156,9 @@ void ABoss1_Phase1::SetToPhase2()
 
 void ABoss1_Phase1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
-	if (Cast<UFireAttribute>(DataAsset->SkillInfo.Attribute))
+	UE_LOG(LogTemp, Warning, TEXT("히트!"));
+	
+	if (FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("불 히트!"));
 		
@@ -173,6 +176,5 @@ void ABoss1_Phase1::DealDamage(float DamageAmount, const UTalismanDataAsset* Dat
 	}
 	else
 	{
-		
 	}
 }

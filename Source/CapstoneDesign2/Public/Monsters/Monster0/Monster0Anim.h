@@ -8,6 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCanDamageAttackEndNotify);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEndNotify);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDieEndNotify);
 
 /**
  * 
@@ -29,4 +30,10 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Animation Notifies")
 	FOnAttackEndNotify OnAttackEndNotify;
+
+	UFUNCTION()
+	void AnimNotify_DieEndNotify() const;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Animation Notifies")
+	FOnDieEndNotify OnDieEndNotify;
 };
