@@ -43,9 +43,23 @@ class CAPSTONEDESIGN2_API AMainCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
-	/** Attack Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* AttackAction;
+	UInputAction* CloseAttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RangedAttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MoveAttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* BallAttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SpecialAttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GodAttackAction;
 public:
 	AMainCharacter();
 
@@ -74,7 +88,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talisman")
 	TSubclassOf<ATalisman> Talisman;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
@@ -82,6 +96,14 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Character")
 	int32 MaxHP = 100;
+
+	// All Normal Talismans
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talisman")
+	TArray<UTalismanDataAsset*> NormalTalismanAssets;
+
+	// All Fire Talismans
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talisman")
+	TArray<UTalismanDataAsset*> FireTalismanAssets;
 
 	UFUNCTION()
 	int32 GetCharacterHP() { return HP; }
@@ -99,6 +121,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<int> DamageArea;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString CurAttribute = "Normal";
+
 protected:
 
 	/** Called for movement input */
@@ -107,8 +132,20 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	/** Called for looking input */
-	void Attack(const FInputActionValue& Value);
+	/** Atteck Section */
+	void Attack();
+
+	void CloseAttack(const FInputActionValue& Value);
+	
+	void RangedAttack(const FInputActionValue& Value);
+
+	void MoveAttack(const FInputActionValue& Value);
+
+	void BallAttack(const FInputActionValue& Value);
+
+	void SpecialAttack(const FInputActionValue& Value);
+
+	void GodAttack(const FInputActionValue& Value);
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -156,4 +193,8 @@ private:
 	APlayerController* PC;
 
 	void EnableMovement();
+
+	bool bNoDamage = false;
+
+	UTalismanDataAsset* SelectedTalismanDataAsset;
 };

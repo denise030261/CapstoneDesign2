@@ -26,9 +26,7 @@ void URangeAttack::BombAttack(UWorld* World, AActor* OtherActor, ATalisman* This
 		return;
 	}
 
-	FVector TalisManLocation(0, -20, 10);
-	TalisManLocation += OtherActor->GetActorLocation();
-	ThisTalisman->SetActorLocation(TalisManLocation);
+	ThisTalisman->AttachToActor(OtherActor, FAttachmentTransformRules::KeepWorldTransform);
 	ThisTalisman->SetActorRotation(FRotator(90, 90, 0));
 
 	FTimerHandle BombTimerHandle;
@@ -64,14 +62,11 @@ void URangeAttack::Bomb(ATalisman* Talisman, AActor* Target)
 		true
 	);
 
-	UE_LOG(LogTemp, Warning, TEXT("Bomb"));
-	UE_LOG(LogTemp, Warning, TEXT("%s : Talisman"), *Talisman->GetName());
 	Talisman->Destroy();
 }
 
 void URangeAttack::DuplicateAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Duplicate"));
 	ThisTalisman->SetActorHiddenInGame(true);
 
 	FActorSpawnParameters SpawnParams;
@@ -105,5 +100,7 @@ void URangeAttack::DuplicateAttack(UWorld* World, AActor* OtherActor, ATalisman*
 			if(SpawnedActor)
 				SpawnedActor->SpawnMove(Locations[i]);
 		}
+
+		ThisTalisman->Destroy();
 	}
 }

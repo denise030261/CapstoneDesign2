@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "TalismanSkillStrategy.h"
 #include "NiagaraSystem.h"
+#include "TalismanDataAsset.h"
 #include <Components/SphereComponent.h>
 #include "SpawnSkill.generated.h"
 
@@ -29,6 +30,9 @@ public:
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USphereComponent* TriggerVolume;
 
@@ -41,8 +45,18 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	float Speed = 10;
 
+	UPROPERTY(EditAnywhere, Category = "Spawn")
+	float StayTime = 5;
+
+	UPROPERTY(EditAnywhere, Category = "Spawn")
+	UTalismanDataAsset* TalismanDataAsset;
+
 	UFUNCTION()
 	void SpawnMove(FVector3d StartLocation);
+
+	UFUNCTION()
+	void SetTalisman(ATalisman* Talisman);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -51,7 +65,11 @@ protected:
 
 private:
 	FTimerHandle DestroyHandle; // Destroy Timer
+	FTimerHandle AttackHandle; // Attack Timer
 	ATalisman* OwnTalisman;
 	AActor* TargetActor;
 	FVector3d TargetDistance;
+
+	UFUNCTION()
+	void RepeatAttack(AActor* OtherActor);
 };

@@ -22,12 +22,12 @@ void USpawnAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 			Owner->GetActorRotation(),
 			SpawnParams);
 
+		SpawnedActor->SetTalisman(Owner);
 		bool left = false;
 		for (int i = 1; i <= SpawnedActor->SpawnCount; i++)
 		{
 			if (left)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Left"));
 				ASpawnSkill* MoreSpawnActor = World->SpawnActor<ASpawnSkill>(
 					Owner->TalismanDataAsset->SkillInfo.SpawnSkill,
 					SpawnLeftLocation,
@@ -36,7 +36,6 @@ void USpawnAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Right"));
 				ASpawnSkill* MoreSpawnActor = World->SpawnActor<ASpawnSkill>(
 					Owner->TalismanDataAsset->SkillInfo.SpawnSkill,
 					SpawnRightLocation,

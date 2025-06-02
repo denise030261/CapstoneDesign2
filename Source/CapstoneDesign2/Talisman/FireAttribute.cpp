@@ -4,11 +4,24 @@
 #include "FireAttribute.h"
 #include "Talisman.h"
 
+UFireAttribute::UFireAttribute()
+{
+	ConstructorHelpers::FClassFinder<ASpawnSkill> SkillBPClass(TEXT("/Game/CapstoneDesign/Blueprints/SpawnActor/BP_SpawnSmallFire"));
+	if (SkillBPClass.Succeeded())
+	{
+		FireActor = SkillBPClass.Class;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed"));
+	}
+}
+
 void UFireAttribute::Attack_Implementation(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman)
 {
-	if (ThisTalisman->TalismanDataAsset->SkillInfo.SpawnSkill)
+	if (World)
 	{
-		if (World)
+		if (FireActor)
 		{
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -16,30 +29,36 @@ void UFireAttribute::Attack_Implementation(UWorld* World, AActor* OtherActor, AT
 			FVector SpawnLocation = OtherActor ? OtherActor->GetActorLocation() + FVector(0, 0, 0) : FVector(0, 0, 0);
 			FRotator SpawnRotation = FRotator::ZeroRotator;
 
-			if (ThisTalisman && ThisTalisman->TalismanDataAsset && ThisTalisman->TalismanDataAsset->SkillInfo.SpawnSkill && World)
+			ASpawnSkill* SpawnedActor = World->SpawnActor<ASpawnSkill>(
+				FireActor,
+				SpawnLocation,
+				SpawnRotation,
+				SpawnParams
+			);
+
+			if (SpawnedActor && OtherActor)
 			{
-				AActor* SpawnedActor = World->SpawnActor<AActor>(
-					ThisTalisman->TalismanDataAsset->SkillInfo.SpawnSkill,
-					SpawnLocation,
-					SpawnRotation,
-					SpawnParams
-				);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("Spawn ½ÇÆÐ!"));
+				USceneComponent* AttachPoint = OtherActor->GetRootComponent();
+				if (AttachPoint)
+				{
+					SpawnedActor->AttachToComponent(AttachPoint, FAttachmentTransformRules::KeepWorldTransform);
+				}
 			}
 
+			if (!SpawnedActor)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Failed to spawn ASpawnSkill!"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("FireActor is null!"));
+		}
 
-		}
-		else {
-			UE_LOG(LogTemp, Warning, TEXT("No World"));
-		}
-		UE_LOG(LogTemp, Warning, TEXT("SpawnSkill"));
+
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No SpawnSkill"));
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("No World"));
 	}
 }
 
@@ -47,3 +66,4 @@ void UFireAttribute::Passive_Implementation(UWorld* World)
 {
 	;
 }
+

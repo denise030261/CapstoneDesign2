@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "TalismanSkillStrategy.h"
+#include <Runtime/LevelSequence/Public/LevelSequence.h>
+#include <Runtime/LevelSequence/Public/LevelSequencePlayer.h>
 #include "GodSkill.generated.h"
 
 /**
@@ -16,4 +18,13 @@ class CAPSTONEDESIGN2_API UGodSkill : public UTalismanSkillStrategy
 	
 public:
 	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
+
+	UPROPERTY(EditAnywhere)
+	ULevelSequence* LevelSequence;
+
+private:
+	ULevelSequencePlayer* LevelSequencePlayer;
+
+	UFUNCTION()
+	void DoneSkill();
 };

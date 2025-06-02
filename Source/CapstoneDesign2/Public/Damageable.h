@@ -22,5 +22,6 @@ class CAPSTONEDESIGN2_API IDamageable
 	GENERATED_BODY()
 
 public:
+	UFUNCTION()
 	virtual void DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset) PURE_VIRTUAL(IDamageable::DealDamage);
 };
