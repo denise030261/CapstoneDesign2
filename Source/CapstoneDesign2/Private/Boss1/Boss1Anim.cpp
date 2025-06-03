@@ -3,14 +3,14 @@
 
 #include "Boss1/Boss1Anim.h"
 
-#include "Boss1/Boss1_Base.h"
+#include "Boss1/Boss1.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UBoss1Anim::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (const ABoss1_Base* Boss1 = Cast<ABoss1_Base>(TryGetPawnOwner()))
+	if (const ABoss1* Boss1 = Cast<ABoss1>(TryGetPawnOwner()))
 	{
 		MoveAnimationPlayRate = CalcMoveAnimationPlayRate(Boss1);
 		AnimMoveSpeed = CalcSpeed(Boss1);

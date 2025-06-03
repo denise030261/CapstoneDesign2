@@ -4,7 +4,7 @@
 #include "Boss1/Boss1GameModeHelper.h"
 
 #include "EngineUtils.h"
-#include "Boss1/Boss1_Phase1.h"
+#include "Boss1/Boss1.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -51,9 +51,9 @@ FRotator UBoss1GameModeHelper::FindPlayerSpawnRotation() const
 	return FRotator(-LookAt.Pitch, LookAt.Yaw, 0.0f);
 }
 
-ABoss1_Phase1* UBoss1GameModeHelper::GenerateBoss1(FVector SpawnLocation, FRotator SpawnRotation)
+ABoss1* UBoss1GameModeHelper::GenerateBoss1(FVector SpawnLocation, FRotator SpawnRotation)
 {
-	Boss1 = GetWorld()->SpawnActor<ABoss1_Phase1>(ABoss1_Phase1::StaticClass(), SpawnLocation, SpawnRotation);
+	Boss1 = GetWorld()->SpawnActor<ABoss1>(ABoss1::StaticClass(), SpawnLocation, SpawnRotation);
 
 	if (Boss1)
 	{

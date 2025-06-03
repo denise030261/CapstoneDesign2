@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Boss1GameModeHelper.generated.h"
 
-class ABoss1_Phase1;
+class ABoss1;
 /**
  * 
  */
@@ -30,10 +30,10 @@ public:
 	FRotator FindPlayerSpawnRotation() const;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boss")
-	ABoss1_Phase1* Boss1;
+	ABoss1* Boss1;
 
 	UFUNCTION(BlueprintCallable, Category = "Boss")
-	ABoss1_Phase1* GenerateBoss1(FVector SpawnLocation, FRotator SpawnRotation);
+	ABoss1* GenerateBoss1(FVector SpawnLocation, FRotator SpawnRotation);
 
 	UFUNCTION(BlueprintCallable)
 	void SetStage();
