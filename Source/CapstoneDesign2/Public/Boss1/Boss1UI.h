@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Boss1UI.generated.h"
 
-class ABoss1_Base;
+class ABoss1;
 /**
  * 
  */
@@ -19,11 +19,14 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	ABoss1_Base* Boss1;
+	ABoss1* Boss1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float HpPercent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	TArray<bool> IsEatIron = { false, false, false };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
+	FString TimerString = TEXT("");
 };

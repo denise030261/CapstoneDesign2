@@ -30,7 +30,7 @@ public:
 	UParticleSystemComponent* ParticleComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
-	float Damage = 50.0f;
+	float Damage = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float PersistentTime = 1.5f;

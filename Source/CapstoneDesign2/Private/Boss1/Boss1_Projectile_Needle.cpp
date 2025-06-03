@@ -48,7 +48,7 @@ ABoss1_Projectile_Needle::ABoss1_Projectile_Needle()
 	TrailParticleComponent->SetupAttachment(RootComponent);
 
 	//static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Stampede_Trail.P_Stampede_Trail'"));
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Grux_Magma_StampedTrail.P_Grux_Magma_StampedTrail'"));
+	//static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Grux_Magma_StampedTrail.P_Grux_Magma_StampedTrail'"));
 	//if (TrailParticleAsset.Succeeded()) TrailParticleComponent->SetTemplate(TrailParticleAsset.Object);
 
 

@@ -3,7 +3,7 @@
 
 #include "Boss1/Boss1_IronGenerator.h"
 
-#include "Boss1/Boss1_Base.h"
+#include "Boss1/Boss1.h"
 #include "Boss1/Boss1_Iron.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/SphereComponent.h"
@@ -88,7 +88,7 @@ void ABoss1_IronGenerator::GenerateIron()
 				for (const FHitResult& HitResult : HitResults)
 				{
 					AActor* OtherActor = HitResult.GetActor();
-					if (Cast<ABoss1_Iron>(OtherActor) || Cast<ABoss1_Base>(OtherActor) || Cast<AMainCharacter>(OtherActor))
+					if (Cast<ABoss1_Iron>(OtherActor) || Cast<ABoss1>(OtherActor) || Cast<AMainCharacter>(OtherActor))
 					{
 						bNeedRegenerate = true;
 						break;
