@@ -18,11 +18,19 @@
 // Sets default values
 ABoss1_Phase1::ABoss1_Phase1()
 {
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGrux/Characters/Heroes/Grux/Meshes/Grux.Grux'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));
 	if (MeshAsset.Succeeded()) GetMesh()->SetSkeletalMesh(MeshAsset.Object);
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load MeshAsset!"));
+	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimSpawnMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_Spawn.AM_Boss1_Spawn'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimSpawnMontage(TEXT("/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_Spawn.AM_Boss1_Spawn"));
 	if (AnimSpawnMontage.Succeeded()) SpawnMontage = AnimSpawnMontage.Object;
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load AnimMontage!"));	
+	}
 }
 
 // Called when the game starts or when spawned

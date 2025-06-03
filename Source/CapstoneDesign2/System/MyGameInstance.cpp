@@ -2,4 +2,16 @@
 
 
 #include "MyGameInstance.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+
+void UMyGameInstance::SetSavedUI(UUserWidget* InUI)
+{
+    SavedUI = InUI;
+}
+
+UUserWidget* UMyGameInstance::GetSavedUI() const
+{
+    return SavedUI;
+}
 
