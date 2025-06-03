@@ -124,6 +124,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString CurAttribute = "Normal";
 
+	// No Damage Time
+	UPROPERTY(EditAnywhere)
+	int NoDamageTime;
+
 protected:
 
 	/** Called for movement input */
@@ -197,4 +201,8 @@ private:
 	bool bNoDamage = false;
 
 	UTalismanDataAsset* SelectedTalismanDataAsset;
+
+	void AddNoDamage();
+
+	FTimerHandle NoDamageTimer;
 };

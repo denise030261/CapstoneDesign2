@@ -135,7 +135,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void AMainCharacter::Move(const FInputActionValue& Value)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Moving"));
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -200,7 +199,8 @@ void AMainCharacter::CloseAttack(const FInputActionValue& Value)
 
 void AMainCharacter::RangedAttack(const FInputActionValue& Value)
 {
-	DisableInput(PC);
+	if(!bAttack)
+		DisableInput(PC);
 
 	if (CurAttribute == "Normal")
 	{
@@ -228,8 +228,9 @@ void AMainCharacter::RangedAttack(const FInputActionValue& Value)
 
 void AMainCharacter::MoveAttack(const FInputActionValue& Value)
 {
-	DisableInput(PC);
-
+	if (!bAttack)
+		DisableInput(PC);
+	 
 	if (CurAttribute == "Normal")
 	{
 		if (NormalTalismanAssets[2])
@@ -256,7 +257,8 @@ void AMainCharacter::MoveAttack(const FInputActionValue& Value)
 
 void AMainCharacter::BallAttack(const FInputActionValue& Value)
 {
-	DisableInput(PC);
+	if (!bAttack)
+		DisableInput(PC);
 
 	if (CurAttribute == "Normal")
 	{
@@ -284,7 +286,8 @@ void AMainCharacter::BallAttack(const FInputActionValue& Value)
 
 void AMainCharacter::SpecialAttack(const FInputActionValue& Value)
 {
-	DisableInput(PC);
+	if (!bAttack)
+		DisableInput(PC);
 
 	if (CurAttribute == "Normal")
 	{
@@ -307,7 +310,8 @@ void AMainCharacter::SpecialAttack(const FInputActionValue& Value)
 
 void AMainCharacter::GodAttack(const FInputActionValue& Value)
 {
-	DisableInput(PC);
+	if (!bAttack)
+		DisableInput(PC);
 
 	if (CurAttribute == "Normal")
 	{
@@ -330,11 +334,6 @@ void AMainCharacter::GodAttack(const FInputActionValue& Value)
 
 void AMainCharacter::Attack()
 {
-	if (bNoDamage)
-	{
-		return;
-	}
-
 	if (AnimInst && !bAttack)
 	{
 		bAttack = true;
@@ -374,7 +373,6 @@ void AMainCharacter::Attack()
 				AnimInst->Montage_Play(AttackMontages[2]);
 				bSkillEffect = false;
 				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[2]);
-				EnableInput(PC);
 			}
 			else
 			{
@@ -413,6 +411,8 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 
 	if (NotifyName == "Spawn" && Talisman != nullptr)
 		ThrowTalisman();
+	else if (NotifyName == "ReleaseNoDamage")
+		AddNoDamage();
 }
 
 void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -422,6 +422,7 @@ void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupt
 		AttackComboIndex = 0;
 	}
 	bAttack = false;
+	bNoDamage = false;
 	EnableInput(PC);
 }
 
@@ -491,8 +492,6 @@ void AMainCharacter::ThrowTalisman()
 
 void AMainCharacter::Dancing()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Dancing"));
-
 	AnimInst->Montage_Play(AttackMontages[2]);
 	bSkillEffect = false;
 	AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[2]);
@@ -510,12 +509,13 @@ void AMainCharacter::SetCharacterHP(int Num)
 
 	if (bNoDamage)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("No Damage State"));
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	float Stun = 0;
 	DisableInput(PC);
-	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	if (HP <= 0)
 	{
 		DamageLevel = 3;
@@ -536,7 +536,7 @@ void AMainCharacter::SetCharacterHP(int Num)
 	else if (Num < DamageArea[1])
 	{
 		DamageLevel = 2;
-		Stun = 5;
+		Stun = 3;
 	} // Fall Down
 
 	if (DamageMontages[DamageLevel])
@@ -544,7 +544,9 @@ void AMainCharacter::SetCharacterHP(int Num)
 		AnimInst->Montage_Play(DamageMontages[DamageLevel]);
 	}
 	bNoDamage = true;
+	bAttack = true;
 
+	// Stun Time
 	FTimerHandle StunTimerHandle;
 	FTimerDelegate StunDelegate;
 	StunDelegate.BindUObject(this, &AMainCharacter::EnableMovement);
@@ -553,9 +555,6 @@ void AMainCharacter::SetCharacterHP(int Num)
 
 void AMainCharacter::EnableMovement()
 {
-	bNoDamage = false;
-
-	UE_LOG(LogTemp, Warning, TEXT("Enable Input"));
 	if (DamageLevel==2)
 	{
 		AnimInst->Montage_Play(GetupMontage);
@@ -570,6 +569,23 @@ void AMainCharacter::EnableMovement()
 		return;
 	}
 
+	// No Damage Time
+	AddNoDamage();
+
 	EnableInput(PC);
+	bAttack = false;
+}
+
+void AMainCharacter::AddNoDamage()
+{
+	FTimerDelegate NoDamageDelegate;
+
+	NoDamageDelegate = FTimerDelegate::CreateLambda([this]()
+		{
+			UE_LOG(LogTemp, Error, TEXT("No Damage Time"));
+			bNoDamage = false;
+		});
+
+	GetWorld()->GetTimerManager().SetTimer(NoDamageTimer, NoDamageDelegate, NoDamageTime, false);
 }
 
