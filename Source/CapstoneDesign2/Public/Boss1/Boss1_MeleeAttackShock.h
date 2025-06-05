@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UParticleSystemComponent* ParticleComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	USoundCue* ShockSound;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float Damage = 10.0f;

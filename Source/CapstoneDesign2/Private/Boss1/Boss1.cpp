@@ -15,6 +15,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "NiagaraComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ABoss1::ABoss1()
@@ -64,6 +66,13 @@ ABoss1::ABoss1()
 	Phase3ParticleComp->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Phase3ParticleAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/MegaMagicVFXBundle/VFX/MagicAuraVFX/VFX/Tsunami/Systems/N_BossEffect.N_BossEffect'"));
 	if (Phase3ParticleAsset.Succeeded()) Phase3ParticleComp->SetAsset(Phase3ParticleAsset.Object);
+
+	FootstepSoundComp = CreateDefaultSubobject<UAudioComponent>(FName("Footstep Sound"));
+	FootstepSoundComp->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+	FootstepSoundComp->SetupAttachment(RootComponent);
+	FootstepSoundComp->bAutoActivate = false;
+	static ConstructorHelpers::FObjectFinder<USoundCue> FootstepSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/Footstep.Footstep'"));
+	if (FootstepSoundAsset.Succeeded()) FootstepSoundComp->SetSound(FootstepSoundAsset.Object);
 	
 	//Animation
 	//Trouble Shooting: 블루프린트 가져올때는 경로 끝에 _C 꼭 붙이기
@@ -84,6 +93,18 @@ ABoss1::ABoss1()
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimDieMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_Die.AM_Boss1_Die'"));
 	if (AnimDieMontage.Succeeded()) DieMontage = AnimDieMontage.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> EatSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/04_Signal_Roar_Cue.04_Signal_Roar_Cue'"));
+	if (EatSoundAsset.Succeeded()) EatSound = EatSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> PatternStartSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/09_Mythic_Roar_Cue.09_Mythic_Roar_Cue'"));
+	if (PatternStartSoundAsset.Succeeded()) PatternStartSound = PatternStartSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> ProjectileStartSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/near-miss-swing-whoosh-3-233426_Cue.near-miss-swing-whoosh-3-233426_Cue'"));
+	if (ProjectileStartSoundAsset.Succeeded()) ProjectileStartSound = ProjectileStartSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> MeleeAttackStartSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/swoosh-6-235279_Cue.swoosh-6-235279_Cue'"));
+	if (MeleeAttackStartSoundAsset.Succeeded()) MeleeAttackStartSound = MeleeAttackStartSoundAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -107,6 +128,18 @@ void ABoss1::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GetCharacterMovement()->Velocity.Size() > 0.1f)
+	{
+		if (!FootstepSoundComp->IsPlaying())
+		{
+			FootstepSoundComp->Play();
+		}
+	}
+	else
+	{
+		FootstepSoundComp->Stop();
+	}
+	
 	CheckState(DeltaTime);
 	
 	if (Phase == 1 && IsActivate)
@@ -275,6 +308,9 @@ void ABoss1::SetTargetIron()
 void ABoss1::EatIron(ABoss1_Iron* Iron)
 {
 	State = EBoss1_State::Eating;
+
+	UGameplayStatics::PlaySoundAtLocation(this, EatSound, GetActorLocation());
+	
 	if (Phase == 1)
 	{
 		InitGrow(GetActorRelativeScale3D().X, GetActorRelativeScale3D().X * EatIronScaleFactor, EatIronTime);
@@ -288,6 +324,7 @@ void ABoss1::EatIron(ABoss1_Iron* Iron)
 		if (Phase == 1)
 		{
 			GetCharacterMovement()->MaxWalkSpeed = MoveSpeedBase1 * FMath::Pow(1.1f, NowIronCount);
+			FootstepSoundComp->PitchMultiplier = FMath::Pow(1.1f / EatIronScaleFactor, NowIronCount);
 		}
 	}
 	else
@@ -390,6 +427,7 @@ void ABoss1::ShootNeedleStart()
 {
 	State = EBoss1_State::Aiming;
 	PatternState = EBoss1_Pattern_State::ShootNeedle;
+	UGameplayStatics::PlaySoundAtLocation(this, PatternStartSound, GetActorLocation());
 	GetMesh()->GetAnimInstance()->Montage_Play(PatternMontage);
 }
 
@@ -401,11 +439,14 @@ void ABoss1::ShootNeedle()
 		const FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerCharacter->GetActorLocation());
 		TArray Rots = Phase == 1 ? TArray({ 0.0f }) : TArray({ -15.0f, -30.0f, 0.0f, 15.0f, 30.0f });
 		
+		UGameplayStatics::PlaySoundAtLocation(this, ProjectileStartSound, GetActorLocation());
+
 		for (int32 i = 0; i < Rots.Num(); i++)
 		{
 			ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), LookAt + FRotator(0.0f, Rots[i], 0.0f));
 			Needle->Damage = ShootNeeleDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
 			Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
+			Needle->RemovalSoundVolumeMultiplier = FMath::Pow(1.2f, -Rots.Num() + 1.0f);
 
 			#if WITH_EDITOR
 			Needle->SetFolderPath(FName("Projectiles"));
@@ -426,6 +467,7 @@ void ABoss1::ThrowMassStart()
 {
 	State = EBoss1_State::Aiming;
 	PatternState = EBoss1_Pattern_State::ThrowMass;
+	UGameplayStatics::PlaySoundAtLocation(this, PatternStartSound, GetActorLocation());
 	GetMesh()->GetAnimInstance()->Montage_Play(PatternMontage);
 }
 
@@ -445,6 +487,7 @@ void ABoss1::ThrowMass()
 		if (!UGameplayStatics::SuggestProjectileVelocity(ProjectileParams, LaunchVelocity))
 			LaunchVelocity = PlayerCharacter->GetActorLocation() - GetActorLocation();
 		
+		UGameplayStatics::PlaySoundAtLocation(this, ProjectileStartSound, GetActorLocation());
 		ABoss1_Projectile_Mass* Mass = GetWorld()->SpawnActor<ABoss1_Projectile_Mass>(MassProjectile, GetActorLocation(), LaunchVelocity.Rotation());
 		Mass->Damage = ThrowMassDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
 		Mass->SetActorRelativeScale3D(Mass->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
@@ -515,6 +558,7 @@ void ABoss1::MeleeAttackStart()
 {
 	State = EBoss1_State::Aiming;
 	PatternState = EBoss1_Pattern_State::MeleeAttack;
+	UGameplayStatics::PlaySoundAtLocation(this, MeleeAttackStartSound, GetActorLocation());
 	GetMesh()->GetAnimInstance()->Montage_Play(MeleeAttackMontages[FMath::RandRange(0, MeleeAttackMontages.Num() - 1)]);
 }
 
@@ -526,7 +570,7 @@ void ABoss1::MeleeAttack()
 	FRotator Rotation = GetActorRotation();
 	FVector StartLocation = GetActorLocation();
 	StartLocation.Z -= GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-	FVector Direction = PlayerCharacter->GetActorLocation() - StartLocation;
+	FVector Direction = GetActorForwardVector();
 	Direction.Z = 0;
 	Direction.Normalize();
 	int32 i = 1;
@@ -623,6 +667,7 @@ void ABoss1::SetPhase2()
 	
 	GetMesh()->SetSkeletalMesh(Phase2Mesh);
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeedBase2;
+	FootstepSoundComp->PitchMultiplier = MoveSpeedBase2 / (MoveSpeedBase1 * FMath::Pow(EatIronScaleFactor, MaxIronCount));
 	
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnEndOnceNotify.RemoveDynamic(this, &ABoss1::ThrowMassEnd);
 	
@@ -648,6 +693,7 @@ void ABoss1::SetPhase3()
 	GetWorldTimerManager().ClearTimer(IdleTimerHandle);
 	GetWorldTimerManager().ClearTimer(CastingTimerHandle);
 	GetMesh()->GetAnimInstance()->Montage_Stop(0);
+	FootstepSoundComp->PitchMultiplier = MoveSpeedBase2 / (MoveSpeedBase1 * FMath::Pow(EatIronScaleFactor, MaxIronCount) * 1.5f);
 	
 	FTimerHandle SetRageHandle;
 	constexpr float GrowTime = 3.0f;

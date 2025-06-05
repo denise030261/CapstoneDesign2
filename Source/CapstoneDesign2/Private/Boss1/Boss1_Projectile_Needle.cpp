@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 class AMainCharacter;
 // Sets default values
@@ -38,23 +39,11 @@ ABoss1_Projectile_Needle::ABoss1_Projectile_Needle()
 	static ConstructorHelpers::FObjectFinder<UMaterialInstanceConstant> MaterialAsset(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Fab/Megascans/Surfaces/Rusty_Metal_Sheet_tj4kedvcw/Raw/MI_tj4kedvcw.MI_tj4kedvcw'"));
 	if (MaterialAsset.Succeeded()) MeshComponent->SetMaterial(0, MaterialAsset.Object);
 	
-	TrailParticleComponent = CreateDefaultSubobject<UParticleSystemComponent>(FName("TrailParticleSystem"));
-	//TrailParticleComponent->SetRelativeLocation(FVector(-193.0f, 0.0f, 0.0f));
-	//TrailParticleComponent->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
-	//TrailParticleComponent->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-	TrailParticleComponent->SetRelativeLocation(FVector(-83.0f, 0.0f, 0.0f));
-	TrailParticleComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	TrailParticleComponent->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
-	TrailParticleComponent->SetupAttachment(RootComponent);
-
-	//static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Stampede_Trail.P_Stampede_Trail'"));
-	//static ConstructorHelpers::FObjectFinder<UParticleSystem> TrailParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/CapstoneDesign/Blueprints/Boss/Boss1/vfx/P_Grux_Magma_StampedTrail.P_Grux_Magma_StampedTrail'"));
-	//if (TrailParticleAsset.Succeeded()) TrailParticleComponent->SetTemplate(TrailParticleAsset.Object);
-
-
-	
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> RemovalParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_Grux_Magma_Ultimate_Clang.P_Grux_Magma_Ultimate_Clang'"));
 	if (RemovalParticleAsset.Succeeded()) RemovalParticle = RemovalParticleAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> RemovalSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/small-rock-break-194553_Cue.small-rock-break-194553_Cue'"));
+	if (RemovalSoundAsset.Succeeded()) RemovalSound = RemovalSoundAsset.Object;
 	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 3000.0f; // 초기 속도
@@ -95,13 +84,13 @@ void ABoss1_Projectile_Needle::OnBeginOverlap(UPrimitiveComponent* OverlappedCom
 		if (AMainCharacter* Player = Cast<AMainCharacter>(OtherActor))
 		{
 			Player->SetCharacterHP(-Damage);
+			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation(), RemovalSoundVolumeMultiplier);
 			Destroy();
 		}
 		else if (OtherActor->IsA(ALandscape::StaticClass()))
 		{
+			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation(), RemovalSoundVolumeMultiplier);
 			Destroy();
 		}
 	}
 }
-
-

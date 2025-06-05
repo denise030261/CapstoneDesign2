@@ -6,10 +6,10 @@
 #include "Landscape.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/SphereComponent.h"
-#include "Engine/StaticMeshActor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ABoss1_Projectile_Mass::ABoss1_Projectile_Mass()
@@ -39,6 +39,9 @@ ABoss1_Projectile_Mass::ABoss1_Projectile_Mass()
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> RemovalParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_Grux_Magma_Ultimate_Clang.P_Grux_Magma_Ultimate_Clang'"));
 	if (RemovalParticleAsset.Succeeded()) RemovalParticle = RemovalParticleAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> RemovalSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/small-rock-break-194553_Cue.small-rock-break-194553_Cue'"));
+	if (RemovalSoundAsset.Succeeded()) RemovalSound = RemovalSoundAsset.Object;
 	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 1000.0f; // 초기 속도
@@ -79,10 +82,12 @@ void ABoss1_Projectile_Mass::OnBeginOverlap(UPrimitiveComponent* OverlappedCompo
 		if (AMainCharacter* Player = Cast<AMainCharacter>(OtherActor))
 		{
 			Player->SetCharacterHP(-Damage);
+			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation());
 			Destroy();
 		}
 		else if (OtherActor->IsA(ALandscape::StaticClass()))
 		{
+			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation());
 			Destroy();
 		}
 	}
