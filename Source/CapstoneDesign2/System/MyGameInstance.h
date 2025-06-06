@@ -15,18 +15,7 @@ class CAPSTONEDESIGN2_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-	// 이전 맵 이름을 저장
-	FString PreviousMapName;
-	
-public:
-    void SetSavedUI(UUserWidget* InUI);
-    UUserWidget* GetSavedUI() const;
+    UPROPERTY(BlueprintReadWrite)
+    FString PreviousMapName;
 
-protected:
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-    TSubclassOf<UUserWidget> UIClass;
-
-private:
-    UPROPERTY()
-    UUserWidget* SavedUI;
 };

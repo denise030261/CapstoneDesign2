@@ -10,8 +10,21 @@
 AActor* ACapstoneDesign2GameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
     UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
-    FString PrevMap = GI ? GI->PreviousMapName : "";
+    FName DesiredTag = NAME_None;
 
+    if (GI)
+    {
+        if (GI->PreviousMapName == "NewTuto")
+        {
+            DesiredTag = FName("FromTuto");
+        }
+        else if (GI->PreviousMapName == "NewBossRoad")
+        {
+            DesiredTag = FName("FromBoss");
+        }
+    }
+
+    // 태그에 맞는 PlayerStart 찾기
     TArray<AActor*> PlayerStarts;
     UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 
@@ -19,44 +32,21 @@ AActor* ACapstoneDesign2GameMode::ChoosePlayerStart_Implementation(AController* 
     {
         if (APlayerStart* PS = Cast<APlayerStart>(Start))
         {
-            if (PrevMap == "NewTuto" && PS->PlayerStartTag == "FromMapTuto")
+            if (PS->PlayerStartTag == DesiredTag)
+            {
                 return PS;
-
-            if (PrevMap == "NewBossRoad" && PS->PlayerStartTag == "FromMapBoss")
-                return PS;
+            }
         }
     }
 
+    // 못 찾으면 기본 위치
     return Super::ChoosePlayerStart_Implementation(Player);
 }
+
 
 
 ACapstoneDesign2GameMode::ACapstoneDesign2GameMode()
 {
 }
 
-void ACapstoneDesign2GameMode::BeginPlay()
-{
-    Super::BeginPlay();
 
-    if (UIClass)
-    {
-        UUserWidget* CreatedUI = CreateWidget<UUserWidget>(GetWorld(), UIClass);
-        if (CreatedUI)
-        {
-            CreatedUI->AddToViewport();
-            CreatedUI->SetVisibility(ESlateVisibility::Visible);
-            SavedUI = CreatedUI;
-        }
-    }
-}
-
-void ACapstoneDesign2GameMode::SetSavedUI(UUserWidget* InUI)
-{
-    SavedUI = InUI;
-}
-
-UUserWidget* ACapstoneDesign2GameMode::GetSavedUI() const
-{
-    return SavedUI;
-}
