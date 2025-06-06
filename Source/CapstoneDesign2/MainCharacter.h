@@ -159,7 +159,7 @@ protected:
 
 	// Attacking
 	UPROPERTY(BlueprintReadOnly)
-	bool bAttack;
+	bool bAttacking;
 
 	// Moving
 	UPROPERTY(BlueprintReadOnly)
@@ -205,4 +205,22 @@ private:
 	void AddNoDamage();
 
 	FTimerHandle NoDamageTimer;
+
+	TArray<FTimerHandle> NormalTalismanTimeHandler;
+
+	TArray<FTimerHandle> FireTalismanTimeHandler;
+
+	TArray<bool> bNormalTalismanUses;
+
+	TArray<bool> bFireTalismanUses;
+	
+	void OnSkillCooldownFinished(int32 TalismanAttribute, int32 SkillIndex);
+
+	void InitTalismanState();
+
+	void PlayAttackAnimation(ATalisman* TalismanObject);
+
+	int SelectedAttackIndex = 0;
+
+	bool bAttackEnable();
 };

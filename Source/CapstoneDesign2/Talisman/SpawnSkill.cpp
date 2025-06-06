@@ -54,7 +54,7 @@ void ASpawnSkill::Tick(float DeltaTime)
 	FVector StartLocation = GetActorLocation();
 	FVector MoveLocation = TargetDistance - StartLocation;
 
-	if (MoveLocation.Size() > 1)
+	if (MoveLocation.Size() > 5)
 	{
 		SetActorLocation(StartLocation + MoveLocation.GetSafeNormal() * Speed * DeltaTime);
 	}

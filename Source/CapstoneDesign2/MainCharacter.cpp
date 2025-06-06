@@ -62,11 +62,10 @@ void AMainCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-	InitCharacterHP();
 
 	bNoDamage = false;
-	CurAttribute = "Normal";
-	SelectedTalismanDataAsset = NormalTalismanAssets[0];
+	InitCharacterHP();
+	InitTalismanState();
 
 	AnimInst = GetMesh()->GetAnimInstance();
 	if (AnimInst)
@@ -93,6 +92,16 @@ void AMainCharacter::BeginPlay()
 	}
 
 	SetActorTickEnabled(false);
+}
+
+void AMainCharacter::InitTalismanState()
+{
+	CurAttribute = "Normal";
+	SelectedTalismanDataAsset = NormalTalismanAssets[0];
+	NormalTalismanTimeHandler.SetNum(NormalTalismanAssets.Num());
+	bNormalTalismanUses.Init(true, NormalTalismanAssets.Num());
+	FireTalismanTimeHandler.SetNum(FireTalismanAssets.Num());
+	bFireTalismanUses.Init(true, FireTalismanAssets.Num());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -173,170 +182,63 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 
 void AMainCharacter::CloseAttack(const FInputActionValue& Value)
 {
-	if (CurAttribute == "Normal")
-	{
-		if (NormalTalismanAssets[0])
-			SelectedTalismanDataAsset = NormalTalismanAssets[0];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-	else
-	{
-		if (FireTalismanAssets[0])
-			SelectedTalismanDataAsset = FireTalismanAssets[0];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-
+	SelectedAttackIndex = 0;
 	Attack();
 }
 
 void AMainCharacter::RangedAttack(const FInputActionValue& Value)
 {
-	if(!bAttack)
+	if(!bAttacking)
 		DisableInput(PC);
 
-	if (CurAttribute == "Normal")
-	{
-		if (NormalTalismanAssets[1])
-			SelectedTalismanDataAsset = NormalTalismanAssets[1];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-	else
-	{
-		if (FireTalismanAssets[1])
-			SelectedTalismanDataAsset = FireTalismanAssets[1];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-
+	SelectedAttackIndex = 1;
 	Attack();
 }
 
 void AMainCharacter::MoveAttack(const FInputActionValue& Value)
 {
-	if (!bAttack)
+	if (!bAttacking)
 		DisableInput(PC);
 	 
-	if (CurAttribute == "Normal")
-	{
-		if (NormalTalismanAssets[2])
-			SelectedTalismanDataAsset = NormalTalismanAssets[2];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-	else
-	{
-		if (FireTalismanAssets[2])
-			SelectedTalismanDataAsset = FireTalismanAssets[2];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-
+	SelectedAttackIndex = 2;
 	Attack();
 }
 
 void AMainCharacter::BallAttack(const FInputActionValue& Value)
 {
-	if (!bAttack)
+	if (!bAttacking)
 		DisableInput(PC);
 
-	if (CurAttribute == "Normal")
-	{
-		if (NormalTalismanAssets[3])
-			SelectedTalismanDataAsset = NormalTalismanAssets[3];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-	else
-	{
-		if (FireTalismanAssets[3])
-			SelectedTalismanDataAsset = FireTalismanAssets[3];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-
+	SelectedAttackIndex = 3;
 	Attack();
 }
 
 void AMainCharacter::SpecialAttack(const FInputActionValue& Value)
 {
-	if (!bAttack)
+	if (!bAttacking)
 		DisableInput(PC);
 
-	if (CurAttribute == "Normal")
-	{
-		EnableInput(PC);
-		return;
-	}
-	else
-	{
-		if (FireTalismanAssets[4])
-			SelectedTalismanDataAsset = FireTalismanAssets[4];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-
+	SelectedAttackIndex = 4;
 	Attack();
 }
 
 void AMainCharacter::GodAttack(const FInputActionValue& Value)
 {
-	if (!bAttack)
+	if (!bAttacking)
 		DisableInput(PC);
 
-	if (CurAttribute == "Normal")
-	{
-		EnableInput(PC);
-		return;
-	}
-	else
-	{
-		if (FireTalismanAssets[5])
-			SelectedTalismanDataAsset = FireTalismanAssets[5];
-		else
-		{
-			EnableInput(PC);
-			return;
-		}
-	}
-
+	SelectedAttackIndex = 5;
 	Attack();
 }
 
 void AMainCharacter::Attack()
 {
-	if (AnimInst && !bAttack)
+	if (!bAttackEnable())
+		return;
+
+	if (AnimInst && !bAttacking)
 	{
-		bAttack = true;
+		bAttacking = true;
 		FRotator YawRotation(0, GetActorRotation().Yaw, 0);
 		ThrowRotation = YawRotation;
 
@@ -352,36 +254,8 @@ void AMainCharacter::Attack()
 				PassiveObjecet->SkillExecute(TalismanObject, GetWorld());
 			}
 
-		ThrowTalisman(); // When spawn, Animation
-		
-		if(TalismanObject)
-		{
-			if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Blow")
-			{
-				AnimInst->Montage_Play(AttackMontages[1]);
-				bSkillEffect = false;
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[1]);
-			}
-			else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Throw")
-			{
-				AnimInst->Montage_Play(AttackMontages[3]);
-				bSkillEffect = false;
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[3]);
-			}
-			else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Dance")
-			{
-				AnimInst->Montage_Play(AttackMontages[2]);
-				bSkillEffect = false;
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[2]);
-			}
-			else
-			{
-				AnimInst->Montage_Play(AttackMontages[0]);
-				MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-				AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[0]);
-			}
-
-		}
+		ThrowTalisman(); // Spawn Talisman
+		PlayAttackAnimation(TalismanObject); // Play animation about Talisman
 	}
 	else
 	{
@@ -389,41 +263,102 @@ void AMainCharacter::Attack()
 	}
 }
 
-void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPayload)
-{ 
-	if (CameraShakeClass)
+void AMainCharacter::PlayAttackAnimation(ATalisman* TalismanObject)
+{
+	if (TalismanObject)
 	{
-		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
-	}
-	AttackComboIndex--;
-
-	if (AttackComboIndex < 0)
-	{
-		if (AnimInst)
+		if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Blow")
 		{
-			bAttack = false;
+			AnimInst->Montage_Play(AttackMontages[1]);
 			bSkillEffect = false;
-			AttackComboIndex = 0;
-			//SetActorRotation(ThrowRotation); // Origin Rotation
-			AnimInst->Montage_Stop(0.4f, AttackMontages[0]);
+			AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[1]);
+		}
+		else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Throw")
+		{
+			AnimInst->Montage_Play(AttackMontages[3]);
+			bSkillEffect = false;
+			AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[3]);
+		}
+		else if (TalismanObject->TalismanDataAsset->SkillInfo.AnimationType == "Dance")
+		{
+			AnimInst->Montage_Play(AttackMontages[2]);
+			bSkillEffect = false;
+			AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[2]);
+		}
+		else
+		{
+			AnimInst->Montage_Play(AttackMontages[0]);
+			MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
+			AnimInst->Montage_SetEndDelegate(MontageEndDelegate, AttackMontages[0]);
+		}
+	}
+}
+
+bool AMainCharacter::bAttackEnable()
+{
+	if (CurAttribute == "Normal")
+	{
+		if (SelectedAttackIndex >= 4)
+		{
+			EnableInput(PC);
+			return false;
+		}
+
+		if (NormalTalismanAssets[SelectedAttackIndex])
+		{
+			SelectedTalismanDataAsset = NormalTalismanAssets[SelectedAttackIndex];
+			if (!bNormalTalismanUses[SelectedAttackIndex])
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CoolTime"));
+				EnableInput(PC);
+				return false;
+			}
+			else
+			{
+				bNormalTalismanUses[SelectedAttackIndex] = false;
+
+				if(SelectedTalismanDataAsset->SkillInfo.CoolTime!=0)
+					GetWorld()->GetTimerManager().SetTimer(
+						NormalTalismanTimeHandler[SelectedAttackIndex],
+						FTimerDelegate::CreateUObject(this, &AMainCharacter::OnSkillCooldownFinished, 0, SelectedAttackIndex),
+						SelectedTalismanDataAsset->SkillInfo.CoolTime,
+						false
+					);
+				else
+					bNormalTalismanUses[SelectedAttackIndex] = true;
+			}
+		}
+	}
+	else
+	{
+		if (FireTalismanAssets[SelectedAttackIndex])
+		{
+			SelectedTalismanDataAsset = FireTalismanAssets[SelectedAttackIndex];
+			if (!bFireTalismanUses[SelectedAttackIndex])
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CoolTime"));
+				EnableInput(PC);
+				return false;
+			}
+			else
+			{
+				bFireTalismanUses[SelectedAttackIndex] = false;
+				if (SelectedTalismanDataAsset->SkillInfo.CoolTime != 0)
+					GetWorld()->GetTimerManager().SetTimer(
+						FireTalismanTimeHandler[SelectedAttackIndex],
+						FTimerDelegate::CreateUObject(this, &AMainCharacter::OnSkillCooldownFinished, 1, SelectedAttackIndex),
+						SelectedTalismanDataAsset->SkillInfo.CoolTime,
+						false
+					);
+				else
+					bFireTalismanUses[SelectedAttackIndex] = true;
+			}
 		}
 	}
 
-	if (NotifyName == "Spawn" && Talisman != nullptr)
-		ThrowTalisman();
-	else if (NotifyName == "ReleaseNoDamage")
-		AddNoDamage();
-}
 
-void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	if (Montage == AttackMontages[0])
-	{
-		AttackComboIndex = 0;
-	}
-	bAttack = false;
-	bNoDamage = false;
-	EnableInput(PC);
+
+	return true;
 }
 
 void AMainCharacter::ThrowTalisman()
@@ -544,7 +479,7 @@ void AMainCharacter::SetCharacterHP(int Num)
 		AnimInst->Montage_Play(DamageMontages[DamageLevel]);
 	}
 	bNoDamage = true;
-	bAttack = true;
+	bAttacking = true;
 
 	// Stun Time
 	FTimerHandle StunTimerHandle;
@@ -558,22 +493,21 @@ void AMainCharacter::EnableMovement()
 	if (DamageLevel==2)
 	{
 		AnimInst->Montage_Play(GetupMontage);
-		MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-		AnimInst->Montage_SetEndDelegate(MontageEndDelegate, GetupMontage);
+		//MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
+		//AnimInst->Montage_SetEndDelegate(MontageEndDelegate, GetupMontage);
 		return;
-	}
+	} // Bigest Damage
 	else if (DamageLevel == 3)
 	{
 		GetWorldSettings()->SetTimeDilation(0.f);
 		// Show UI Widget
 		return;
-	}
+	} // Die
 
 	// No Damage Time
 	AddNoDamage();
-
 	EnableInput(PC);
-	bAttack = false;
+	bAttacking = false;
 }
 
 void AMainCharacter::AddNoDamage()
@@ -589,3 +523,61 @@ void AMainCharacter::AddNoDamage()
 	GetWorld()->GetTimerManager().SetTimer(NoDamageTimer, NoDamageDelegate, NoDamageTime, false);
 }
 
+void AMainCharacter::OnSkillCooldownFinished(int32 TalismanAttribute, int32 SkillIndex)
+{
+	if (TalismanAttribute==0)
+	{
+		bNormalTalismanUses[SkillIndex] = true;
+	}
+	else
+	{
+		bFireTalismanUses[SkillIndex] = true;
+	}
+}
+
+
+/////////////////////
+//Animation
+
+void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPayload)
+{
+	if (NotifyName == "ReleaseNoDamage")
+	{
+		bAttacking = false;
+		EnableInput(PC);
+		AddNoDamage();
+		return;
+	}
+
+	if (CameraShakeClass)
+	{
+		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
+	}
+	AttackComboIndex--;
+
+	if (AttackComboIndex < 0)
+	{
+		if (AnimInst)
+		{
+			bAttacking = false;
+			bSkillEffect = false;
+			AttackComboIndex = 0;
+			//SetActorRotation(ThrowRotation); // Origin Rotation
+			AnimInst->Montage_Stop(0.4f, AttackMontages[0]);
+		}
+	}
+
+	if (NotifyName == "Spawn" && Talisman != nullptr)
+		ThrowTalisman();
+}
+
+void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == AttackMontages[0])
+	{
+		AttackComboIndex = 0;
+	}
+	bAttacking = false;
+	bNoDamage = false;
+	EnableInput(PC);
+}

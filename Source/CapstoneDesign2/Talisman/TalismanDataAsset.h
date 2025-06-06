@@ -50,6 +50,9 @@ struct FSkillData
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     FString AnimationType;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    int32 CoolTime;
 };
 
 UCLASS()
