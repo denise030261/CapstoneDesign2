@@ -30,8 +30,14 @@ public:
     UPROPERTY(BlueprintReadWrite)
     FString QuestString;
 
+    UPROPERTY(BlueprintReadWrite)
+    FString RepresentativeQuestString;
+
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     int32 IronCount = 0;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool GetNPC2Quest;
 
     UFUNCTION(BlueprintCallable)
     void AddIronCount() { IronCount++; }
