@@ -72,6 +72,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* DieMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<AActor> DeadMonster;
+
+
 private:
 	UPROPERTY()
 	UMonster1Anim* AnimInstance;

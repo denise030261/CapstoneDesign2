@@ -28,8 +28,11 @@ public:
     int32 MonsterCount;
 
     UPROPERTY(BlueprintReadWrite)
-    int32 IronCount;
-
-    UPROPERTY(BlueprintReadWrite)
     FString QuestString;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    int32 IronCount = 0;
+
+    UFUNCTION(BlueprintCallable)
+    void AddIron() { IronCount++; }
 };
