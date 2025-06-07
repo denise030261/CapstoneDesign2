@@ -5,7 +5,9 @@
 
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 class AMainCharacter;
 // Sets default values
@@ -26,6 +28,9 @@ ABoss1_MeleeAttackShock::ABoss1_MeleeAttackShock()
 	ParticleComponent->SetupAttachment(RootComponent);
 	ParticleComponent->OnSystemFinished.AddDynamic(this, &ABoss1_MeleeAttackShock::OnParticleSystemFinished);
 	
+	static ConstructorHelpers::FObjectFinder<USoundCue> ShockSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/Shock_Cue.Shock_Cue'"));
+	if (ShockSoundAsset.Succeeded()) ShockSound = ShockSoundAsset.Object;
+	
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_MagmaHardknocks_AOE.P_MagmaHardknocks_AOE'"));
 	ParticleComponent->SetTemplate(ParticleAsset.Object);
 }
@@ -34,6 +39,7 @@ ABoss1_MeleeAttackShock::ABoss1_MeleeAttackShock()
 void ABoss1_MeleeAttackShock::BeginPlay()
 {
 	Super::BeginPlay();
+	UGameplayStatics::PlaySoundAtLocation(this, ShockSound, GetActorLocation());
 	FTimerHandle CanDealDamageHandle;
 	GetWorldTimerManager().SetTimer(CanDealDamageHandle, [&] { CanDealDamage = false; }, PersistentTime, false);
 }

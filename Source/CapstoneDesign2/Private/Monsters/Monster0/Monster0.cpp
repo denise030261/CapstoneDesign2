@@ -10,9 +10,11 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Monsters/MonsterUI.h"
 #include "Monsters/Monster0/Monster0Anim.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 AMonster0::AMonster0()
@@ -45,6 +47,12 @@ AMonster0::AMonster0()
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimDieMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Monster/Monster0/AM_Monster0_Die.AM_Monster0_Die'"));
 	if (AnimDieMontage.Succeeded()) DieMontage = AnimDieMontage.Object;
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> AttackSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/swing-whoosh-weapon_Cue.swing-whoosh-weapon_Cue'"));
+	if (AttackSoundAsset.Succeeded()) AttackSound = AttackSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> DieSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/Monster0-Die.Monster0-Die'"));
+	if (DieSoundAsset.Succeeded()) DieSound = DieSoundAsset.Object;
+	
 	Name = TEXT("요괴");
 	MaxHp = 100.0f;
 }
@@ -129,6 +137,7 @@ void AMonster0::StartAttack()
 
 	CanDamageAttack = true;
 	GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
+	UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
 }
 
 void AMonster0::EndCanDamageAttack()
@@ -164,6 +173,7 @@ void AMonster0::SetDie()
 {
 	State = EMonster0_State::Die;
 	GetMesh()->GetAnimInstance()->Montage_Play(DieMontage);
+	UGameplayStatics::PlaySoundAtLocation(this, DieSound, GetActorLocation());
 	GetWorldTimerManager().ClearTimer(AttackReadyHandle);
 	CanDamageAttack = false;
 }

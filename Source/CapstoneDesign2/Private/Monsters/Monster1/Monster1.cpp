@@ -10,9 +10,11 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Monsters/MonsterUI.h"
 #include "Monsters/Monster1/Monster1Anim.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 AMonster1::AMonster1()
@@ -33,7 +35,7 @@ AMonster1::AMonster1()
 	
 	WeaponColliderR = CreateDefaultSubobject<USphereComponent>(FName("Weapon Collider R"));
 	WeaponColliderR->OnComponentBeginOverlap.AddDynamic(this, &AMonster1::OnWeaponOverlapBegin);
-	WeaponColliderR->SetSphereRadius(15.0f);
+	WeaponColliderR->SetSphereRadius(20.0f);
 	WeaponColliderR->SetupAttachment(RootComponent);
 	
 	//Animation
@@ -46,8 +48,14 @@ AMonster1::AMonster1()
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimDieMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Monster/Monster1/AM_Monster1_Die.AM_Monster1_Die'"));
 	if (AnimDieMontage.Succeeded()) DieMontage = AnimDieMontage.Object;
-
-	Name = TEXT("이름뭘로하지");
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> AttackSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DoorsCue/Drs_Wood_Door_Close_01_Cue.Drs_Wood_Door_Close_01_Cue'"));
+	if (AttackSoundAsset.Succeeded()) AttackSound = AttackSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> DieSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DoorsCue/Drs_Wood_DoubleDoor_Open_01_Cue.Drs_Wood_DoubleDoor_Open_01_Cue'"));
+	if (DieSoundAsset.Succeeded()) DieSound = DieSoundAsset.Object;
+	
+	Name = TEXT("장화훤요의 편린");
 	MaxHp = 150.0f;
 }
 
@@ -178,6 +186,7 @@ void AMonster1::StartAttack()
 
 	CanDamageAttack = true;
 	GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
+	UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
 }
 
 void AMonster1::EndAttack()
@@ -210,6 +219,7 @@ void AMonster1::SetDie()
 {
 	State = EMonster1_State::Die;
 	GetMesh()->GetAnimInstance()->Montage_Play(DieMontage);
+	UGameplayStatics::PlaySoundAtLocation(this, DieSound, GetActorLocation());
 	GetWorldTimerManager().ClearTimer(AttackReadyHandle);
 	GetWorldTimerManager().ClearTimer(GazeHandle);
 	CanDamageAttack = false;

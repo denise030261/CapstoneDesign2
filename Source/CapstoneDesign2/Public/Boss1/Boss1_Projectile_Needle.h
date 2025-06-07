@@ -30,10 +30,13 @@ public:
 	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Particle")
-	UParticleSystemComponent* TrailParticleComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Particle")
 	UParticleSystem* RemovalParticle;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* RemovalSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Sound")
+	float RemovalSoundVolumeMultiplier = 1.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	UProjectileMovementComponent* ProjectileMovement;

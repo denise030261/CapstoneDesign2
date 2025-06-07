@@ -65,6 +65,9 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Component")
 	UNiagaraComponent* Phase3ParticleComp;
 	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Component")
+	UAudioComponent* FootstepSoundComp;
+	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
 	USkeletalMesh* Phase1Mesh;
 	
@@ -197,6 +200,18 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* DieMontage;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* EatSound;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* PatternStartSound;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* ProjectileStartSound;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* MeleeAttackStartSound;
+	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()

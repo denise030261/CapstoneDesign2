@@ -66,6 +66,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* DieMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* AttackSound;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* DieSound;
+
 private:
 	bool CanDamageAttack = false;
 	FTimerHandle AttackReadyHandle;
