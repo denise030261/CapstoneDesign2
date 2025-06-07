@@ -217,5 +217,18 @@ void AMonster1::SetDie()
 
 void AMonster1::EndDie()
 {
+	if (DeadMonster)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		GetWorld()->SpawnActor<AActor>(
+			DeadMonster,
+			GetActorLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+	}
+
 	Destroy();
 }

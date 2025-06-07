@@ -34,5 +34,8 @@ public:
     int32 IronCount = 0;
 
     UFUNCTION(BlueprintCallable)
-    void AddIron() { IronCount++; }
+    void AddIronCount() { IronCount++; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetAddIronCount() const { return IronCount; }
 };
