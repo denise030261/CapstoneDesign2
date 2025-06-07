@@ -18,4 +18,18 @@ public:
     UPROPERTY(BlueprintReadWrite)
     FString PreviousMapName;
 
+    UPROPERTY(BlueprintReadWrite)
+    bool EverBossRoad;
+
+    UPROPERTY(BlueprintReadWrite)
+    bool EverTown;
+
+    UPROPERTY(BlueprintReadWrite)
+    int32 MonsterCount;
+
+    UPROPERTY(BlueprintReadWrite)
+    int32 IronCount;
+
+    UPROPERTY(BlueprintReadWrite)
+    FString QuestString;
 };
