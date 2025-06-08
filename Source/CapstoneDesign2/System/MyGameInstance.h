@@ -44,4 +44,16 @@ public:
 
     UFUNCTION(BlueprintCallable)
     int32 GetAddIronCount() const { return IronCount; }
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool IsPattern1;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool IsPattern2;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool IsPattern3;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool NoPattern;
 };

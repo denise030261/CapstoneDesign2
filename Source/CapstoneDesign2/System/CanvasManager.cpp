@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "MyGameInstance.h"
 #include "Components/ActorComponent.h"
 
 // 생성자
@@ -133,6 +134,20 @@ bool ACanvasManager::CheckAllAnswersAndReset()
         {
             bMatchedAny = true;
             UE_LOG(LogTemp, Warning, TEXT(" Matched with Pattern %d"), PatternIndex);
+            switch(PatternIndex)
+			{
+			case 0:
+				Cast<UMyGameInstance>(GetGameInstance())->IsPattern1 = true;
+				break;
+			case 1:
+				Cast<UMyGameInstance>(GetGameInstance())->IsPattern2 = true;
+				break;
+			case 2:
+				Cast<UMyGameInstance>(GetGameInstance())->IsPattern3 = true;
+				break;
+			default:
+				UE_LOG(LogTemp, Warning, TEXT(" Unknown pattern index: %d"), PatternIndex);
+			}
             break;
         }
     }
@@ -140,6 +155,7 @@ bool ACanvasManager::CheckAllAnswersAndReset()
     if (!bMatchedAny)
     {
         UE_LOG(LogTemp, Warning, TEXT(" No pattern matched."));
+        Cast<UMyGameInstance>(GetGameInstance())->NoPattern = true;
     }
 
     // 모든 bIsOn 초기화
@@ -151,6 +167,17 @@ bool ACanvasManager::CheckAllAnswersAndReset()
         if (BoolProp)
         {
             BoolProp->SetPropertyValue_InContainer(Canvas, false);
+        }
+
+        UFunction* ClearCanvasFunc = Canvas->FindFunction(FName("ClearCanvas"));
+        if (ClearCanvasFunc)
+        {
+            Canvas->ProcessEvent(ClearCanvasFunc, nullptr);
+            UE_LOG(LogTemp, Log, TEXT("Cleared canvas: %s"), *Canvas->GetName());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("ClearCanvas() function not found on %s"), *Canvas->GetName());
         }
     }
 
