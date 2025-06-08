@@ -86,6 +86,7 @@ void UGodSkill::AllCharacterMove(UWorld* World, bool bMove)
             Boss->SetActorEnableCollision(bMove);
             Boss->SetActorTickEnabled(bMove);
             Boss->FootstepSoundComp->Stop();
+            Boss->NowHp -= 100;
         }
     }
     else
