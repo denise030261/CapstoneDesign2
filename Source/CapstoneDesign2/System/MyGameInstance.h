@@ -70,7 +70,7 @@ public:
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool NoPattern;
 
-    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
     bool UnLockSkill;
 
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
