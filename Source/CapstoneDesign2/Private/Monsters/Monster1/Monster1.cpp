@@ -205,12 +205,14 @@ void AMonster1::UpdateWeaponColliders() const
 	const FVector WeaponRLocation = GetMesh()->GetSocketLocation(FName("middle_01_r"));
 	WeaponColliderR->SetWorldLocation(WeaponRLocation);
 	
+#if WITH_EDITOR
 	DrawDebugSphere(GetWorld(),
 		WeaponColliderR->GetComponentLocation(),
 		WeaponColliderR->GetScaledSphereRadius(),
 		12,
 		CanDamageAttack ? FColor::Red : FColor::Green,
 		false);
+#endif
 }
 
 void AMonster1::UpdateAnimInstance() const

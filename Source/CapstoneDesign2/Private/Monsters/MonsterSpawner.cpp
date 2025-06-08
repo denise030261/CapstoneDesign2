@@ -34,7 +34,9 @@ void AMonsterSpawner::BeginPlay()
 		GenerateMonster();
 	}
 	
+#if WITH_EDITOR
 	DrawDebugSphere(GetWorld(), GetActorLocation(), SpawnRadius, 12, FColor::Green, true);
+#endif
 }
 
 void AMonsterSpawner::GenerateMonster()

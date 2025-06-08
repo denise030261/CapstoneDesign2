@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "TalismanDataAsset.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "Talisman.generated.h"
 
 UCLASS()

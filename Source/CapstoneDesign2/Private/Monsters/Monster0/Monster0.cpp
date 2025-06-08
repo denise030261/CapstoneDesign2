@@ -164,13 +164,15 @@ void AMonster0::UpdateWeaponColliders() const
 	
 	WeaponColliderL->SetWorldLocation(WeaponLLocation);
 	WeaponColliderL->SetWorldRotation(WeaponLRotation);
-	
+
+#if WITH_EDITOR
 	DrawDebugBox(GetWorld(),
 		WeaponColliderL->GetComponentLocation(),
 		WeaponColliderL->GetScaledBoxExtent(),
 		WeaponColliderL->GetComponentQuat(),
 		CanDamageAttack ? FColor::Red : FColor::Green,
 		false);
+#endif
 }
 
 void AMonster0::SetDie()

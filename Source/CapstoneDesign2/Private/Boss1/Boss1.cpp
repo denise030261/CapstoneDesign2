@@ -598,8 +598,11 @@ void ABoss1::MeleeAttack()
 		ABoss1_MeleeAttackShock* Shock = GetWorld()->SpawnActor<ABoss1_MeleeAttackShock>(MeleeAttackShock, Location, Rotation);
 		Shock->SetActorRelativeScale3D(Shock->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
 		Shock->Damage = MeleeAttackShockDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
-		DrawDebugSphere(GetWorld(), Shock->GetActorLocation(), Shock->CollisionComponent->GetScaledSphereRadius(), 12, FColor::Red, false, 1.5f);
 		i++;
+		
+#if WITH_EDITOR
+		DrawDebugSphere(GetWorld(), Shock->GetActorLocation(), Shock->CollisionComponent->GetScaledSphereRadius(), 12, FColor::Red, false, 1.5f);
+#endif
 	},
 	0.2f,
 	true,

@@ -6,6 +6,7 @@
 #include "Damageable.h"
 #include "GameFramework/Character.h"
 #include "Monsters/MonsterBase.h"
+#include "Sound/SoundCue.h"
 #include "Monster1.generated.h"
 
 class UMonster1Anim;

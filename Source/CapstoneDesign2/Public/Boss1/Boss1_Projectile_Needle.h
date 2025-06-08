@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Sound/SoundCue.h"
 #include "Boss1_Projectile_Needle.generated.h"
 
 class UProjectileMovementComponent;

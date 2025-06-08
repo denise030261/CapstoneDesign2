@@ -47,8 +47,9 @@ void ABoss1_IronGenerator::BeginPlay()
 #endif
 		}
 	}
-	
+#if WITH_EDITOR
 	DrawDebugSphere(GetWorld(), GetActorLocation(), SpawnRadius, 12, FColor::Green, true);
+#endif
 }
 
 void ABoss1_IronGenerator::GenerateIron()

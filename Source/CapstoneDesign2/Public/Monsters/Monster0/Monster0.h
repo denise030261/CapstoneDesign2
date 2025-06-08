@@ -6,6 +6,7 @@
 #include "Damageable.h"
 #include "GameFramework/Character.h"
 #include "Monsters/MonsterBase.h"
+#include "Sound/SoundCue.h"
 #include "Monster0.generated.h"
 
 class UWidgetComponent;

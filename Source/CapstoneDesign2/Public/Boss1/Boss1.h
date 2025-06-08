@@ -8,6 +8,8 @@
 #include "Boss1_Projectile_Needle.h"
 #include "Damageable.h"
 #include "GameFramework/Character.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "Boss1.generated.h"
 
 class UNiagaraComponent;
