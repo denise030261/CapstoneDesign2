@@ -52,6 +52,9 @@ AMonster1::AMonster1()
 	static ConstructorHelpers::FObjectFinder<USoundCue> AttackSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DoorsCue/Drs_Wood_Door_Close_01_Cue.Drs_Wood_Door_Close_01_Cue'"));
 	if (AttackSoundAsset.Succeeded()) AttackSound = AttackSoundAsset.Object;
 	
+	static ConstructorHelpers::FObjectFinder<USoundCue> AttackHitSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DarkCue/Impact_Guts_Gore_01_Cue.Impact_Guts_Gore_01_Cue'"));
+	if (AttackHitSoundAsset.Succeeded()) AttackHitSound = AttackHitSoundAsset.Object;
+	
 	static ConstructorHelpers::FObjectFinder<USoundCue> DieSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DoorsCue/Drs_Wood_DoubleDoor_Open_01_Cue.Drs_Wood_DoubleDoor_Open_01_Cue'"));
 	if (DieSoundAsset.Succeeded()) DieSound = DieSoundAsset.Object;
 	
@@ -99,6 +102,7 @@ void AMonster1::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		{
 			Character->SetCharacterHP(-AttackDamage);
 			CanDamageAttack = false;
+			UGameplayStatics::PlaySoundAtLocation(this, AttackHitSound, SweepResult.Location);
 		}
 	}
 }

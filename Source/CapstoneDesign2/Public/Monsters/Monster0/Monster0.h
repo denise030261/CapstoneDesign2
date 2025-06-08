@@ -68,6 +68,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
 	USoundCue* AttackSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundCue* AttackHitSound;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
 	USoundCue* DieSound;
