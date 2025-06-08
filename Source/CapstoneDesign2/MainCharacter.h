@@ -94,7 +94,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="UI")
 	TSubclassOf<UUserWidget> UIPlayerClass;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	int32 MaxHP = 100;
 
 	// All Normal Talismans
@@ -105,7 +105,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talisman")
 	TArray<UTalismanDataAsset*> FireTalismanAssets;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	int32 GetCharacterHP() { return HP; }
 
 	UFUNCTION(BlueprintCallable)
