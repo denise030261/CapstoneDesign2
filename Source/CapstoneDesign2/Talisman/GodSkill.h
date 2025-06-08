@@ -31,5 +31,8 @@ private:
 	bool bUsing = false;
 
 	UFUNCTION()
-	void AllCharacterMove(bool bMove);
+	void AllCharacterMove(UWorld* World, bool bMove);
+
+	UPROPERTY() 
+	TWeakObjectPtr<UWorld> CachedWorld;
 };

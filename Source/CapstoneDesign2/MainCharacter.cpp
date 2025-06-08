@@ -15,6 +15,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Talisman/PassiveSkill.h"
 #include <Kismet/GameplayStatics.h>
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -163,8 +165,6 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
-
-	// 쓰러지고 일어날 때의 호출
 }
 
 void AMainCharacter::Look(const FInputActionValue& Value)
@@ -374,7 +374,6 @@ void AMainCharacter::ThrowTalisman()
 		return;
 
 	TalismanInstance->TalismanDataAsset = SelectedTalismanDataAsset;
-
 	TalismanInstance->SetMoveDistance(ThrowLocation + ForwardDirection * TalismanInstance->TalismanDataAsset->SkillInfo.Distance);
 
 	// Call SkillExecute Function
@@ -581,3 +580,20 @@ void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	bNoDamage = false;
 	EnableInput(PC);
 }
+
+/*
+void AISeeMeCharacter::Focus()
+{
+	if (AISMPlayerController* ISMPlayerController = GetController<AISMPlayerController>())
+	{
+		if (ACharacter* OtherCharacter = ISMPlayerController->GetOtherCharacter())
+		{
+			FocusStartRotator = ISMPlayerController->GetControlRotation();
+
+			float NewYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), OtherCharacter->GetActorLocation()).Yaw;
+			FocusEndRotator = FRotator(FocusStartRotator.Pitch, NewYaw, FocusStartRotator.Roll);
+
+			FocusTimeline->PlayFromStart();
+		}
+	}
+}*/

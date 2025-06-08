@@ -8,6 +8,9 @@
 #include "NormalAttribute.h"
 #include "MoveSkill.h"
 #include <Damageable.h>
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 ATalisman::ATalisman()
@@ -29,6 +32,9 @@ ATalisman::ATalisman()
 	TriggerVolume->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	TriggerVolume->SetGenerateOverlapEvents(true);
 	TriggerVolume->SetupAttachment(TalismanMesh);
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(FName("Footstep Sound"));
+	AudioComponent->SetupAttachment(RootComponent);
 }
 
 void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -58,6 +64,23 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 
 		UTalismanSkillStrategy* SkillCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
 		UTalismanAttributeStrategy* AttributeCDO = TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>();
+
+		if (UFireAttribute* FireAttackCDO = Cast<UFireAttribute>(AttributeCDO))
+		{
+			if (FireSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, GetActorLocation());
+				UE_LOG(LogTemp, Log, TEXT("Played FireSound at location: %s"), *FireSound->GetName());
+			}
+		}
+		else if (UNormalAttribute* NormalAttackCDO = Cast<UNormalAttribute>(AttributeCDO))
+		{
+			if (NormalSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), NormalSound, GetActorLocation());
+				UE_LOG(LogTemp, Log, TEXT("Played NormalSound at location: %s"), *NormalSound->GetName());
+			}
+		}
 
 		if (URangeAttack* RangeAttackCDO = Cast<URangeAttack>(SkillCDO))
 		{

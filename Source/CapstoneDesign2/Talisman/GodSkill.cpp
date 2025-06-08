@@ -8,9 +8,12 @@
 #include <CapstoneDesign2/MainCharacter.h>
 #include <Kismet/GameplayStatics.h>
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/AudioComponent.h"
 
 void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
+    CachedWorld = World;
+
 	ALevelSequenceActor* OutLevelSequenceActor = nullptr;  // LevelSequenceActor를 받을 변수 선언
 	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
 		World, LevelSequence, FMovieSceneSequencePlaybackSettings(), OutLevelSequenceActor);
@@ -19,9 +22,9 @@ void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 	{
 		if (World)
 		{
-			AllCharacterMove(false);
+			AllCharacterMove(World, false);
 		}
-		LevelSequencePlayer->OnFinished.AddDynamic(this, &UGodSkill::DoneSkill); //=> 끝낼 때 Input 활성화
+		LevelSequencePlayer->OnFinished.AddDynamic(this, &UGodSkill::DoneSkill); 
 		LevelSequencePlayer->Play();
 	}
 	else
@@ -35,32 +38,58 @@ void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 
 void UGodSkill::DoneSkill()
 {
-	AllCharacterMove(true);
-	UE_LOG(LogTemp, Warning, TEXT("Done Skill"));
+    if (CachedWorld.IsValid()) // 저장된 월드 포인터가 유효한지 확인
+    {
+        UWorld* World = CachedWorld.Get();
+        AllCharacterMove(World, true);
+        UE_LOG(LogTemp, Warning, TEXT("Done Skill"));
+    }
 }
 
-void UGodSkill::AllCharacterMove(bool bMove)
+void UGodSkill::AllCharacterMove(UWorld* World, bool bMove)
 {
-	AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	if (Player && Player->GetCharacterMovement())
-	{
-		Player->GetCharacterMovement()->DisableMovement();
-		Player->SetActorHiddenInGame(!bMove);
-		Player->SetActorEnableCollision(bMove);
-		Player->SetActorTickEnabled(bMove);
-	}
+    if (!World)
+    {
+        UE_LOG(LogTemp, Error, TEXT("AllCharacterMove: World is null!"));
+        return;
+    }
 
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoss1::StaticClass(), FoundActors);
+    AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
+    if (Player && Player->GetCharacterMovement())
+    {
+        if (bMove)
+        {
+            Player->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // 움직임 활성화
+        }
+        else
+        {
+            Player->GetCharacterMovement()->DisableMovement(); // 움직임 비활성화
+        }
+        Player->SetActorHiddenInGame(!bMove);
+        Player->SetActorEnableCollision(bMove);
+        Player->SetActorTickEnabled(bMove);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Not player"));
+    }
 
-	if (FoundActors.Num() > 0)
-	{
-		ABoss1* Boss = Cast<ABoss1>(FoundActors[0]);
-		if (Boss)
-		{
-			Boss->SetActorHiddenInGame(!bMove);
-			Boss->SetActorEnableCollision(bMove);
-			Boss->SetActorTickEnabled(bMove);
-		}
-	}
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(World, ABoss1::StaticClass(), FoundActors);
+
+    if (FoundActors.Num() > 0)
+    {
+        ABoss1* Boss = Cast<ABoss1>(FoundActors[0]);
+        if (Boss)
+        {
+            Boss->SetActorHiddenInGame(!bMove);
+            Boss->SetActorEnableCollision(bMove);
+            Boss->SetActorTickEnabled(bMove);
+            Boss->FootstepSoundComp->Stop();
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Not Boss"));
+    }
 }

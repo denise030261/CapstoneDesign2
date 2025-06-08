@@ -28,6 +28,15 @@ public:
 	// Move Talisman
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* FireSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundCue* NormalSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
 	UTalismanDataAsset* TalismanDataAsset;
 
