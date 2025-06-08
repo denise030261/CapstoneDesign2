@@ -27,4 +27,9 @@ private:
 
 	UFUNCTION()
 	void DoneSkill();
+
+	bool bUsing = false;
+
+	UFUNCTION()
+	void AllCharacterMove(bool bMove);
 };

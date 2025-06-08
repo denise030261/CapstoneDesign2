@@ -4,6 +4,10 @@
 #include "GodSkill.h"
 #include "LevelSequencePlayer.h"
 #include "LevelSequenceActor.h"
+#include <Boss1/Boss1.h>
+#include <CapstoneDesign2/MainCharacter.h>
+#include <Kismet/GameplayStatics.h>
+#include "GameFramework/CharacterMovementComponent.h"
 
 void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
@@ -15,7 +19,7 @@ void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 	{
 		if (World)
 		{
-			// 무력화
+			AllCharacterMove(false);
 		}
 		LevelSequencePlayer->OnFinished.AddDynamic(this, &UGodSkill::DoneSkill); //=> 끝낼 때 Input 활성화
 		LevelSequencePlayer->Play();
@@ -31,6 +35,32 @@ void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 
 void UGodSkill::DoneSkill()
 {
-	// Player, Boss Enable
+	AllCharacterMove(true);
 	UE_LOG(LogTemp, Warning, TEXT("Done Skill"));
+}
+
+void UGodSkill::AllCharacterMove(bool bMove)
+{
+	AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	if (Player && Player->GetCharacterMovement())
+	{
+		Player->GetCharacterMovement()->DisableMovement();
+		Player->SetActorHiddenInGame(!bMove);
+		Player->SetActorEnableCollision(bMove);
+		Player->SetActorTickEnabled(bMove);
+	}
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABoss1::StaticClass(), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		ABoss1* Boss = Cast<ABoss1>(FoundActors[0]);
+		if (Boss)
+		{
+			Boss->SetActorHiddenInGame(!bMove);
+			Boss->SetActorEnableCollision(bMove);
+			Boss->SetActorTickEnabled(bMove);
+		}
+	}
 }
