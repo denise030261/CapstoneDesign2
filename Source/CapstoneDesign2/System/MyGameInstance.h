@@ -21,8 +21,21 @@ public:
     UPROPERTY(BlueprintReadWrite)
     bool EverBossRoad;
 
+    UFUNCTION(BlueprintCallable)
+    bool GetEverBossRoad() const { return EverBossRoad; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetEverBossRoad(bool b) { EverBossRoad = b; }
+
+
     UPROPERTY(BlueprintReadWrite)
     bool EverTown;
+
+    UFUNCTION(BlueprintCallable)
+    bool GetEverTown() const { return EverTown; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetEverTown(bool b) { EverTown = b; }
 
     UPROPERTY(BlueprintReadWrite)
     int32 MonsterCount;
@@ -56,4 +69,10 @@ public:
 
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool NoPattern;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool UnLockSkill;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool KillBossProcess;
 };
