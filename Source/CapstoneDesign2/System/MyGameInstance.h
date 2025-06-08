@@ -18,4 +18,42 @@ public:
     UPROPERTY(BlueprintReadWrite)
     FString PreviousMapName;
 
+    UPROPERTY(BlueprintReadWrite)
+    bool EverBossRoad;
+
+    UPROPERTY(BlueprintReadWrite)
+    bool EverTown;
+
+    UPROPERTY(BlueprintReadWrite)
+    int32 MonsterCount;
+
+    UPROPERTY(BlueprintReadWrite)
+    FString QuestString;
+
+    UPROPERTY(BlueprintReadWrite)
+    FString RepresentativeQuestString;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    int32 IronCount = 0;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool GetNPC2Quest;
+
+    UFUNCTION(BlueprintCallable)
+    void AddIronCount() { IronCount++; }
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetAddIronCount() const { return IronCount; }
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool IsPattern1;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool IsPattern2;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool IsPattern3;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool NoPattern;
 };
