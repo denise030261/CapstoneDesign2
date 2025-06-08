@@ -11,9 +11,11 @@ void UBoss1UI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	if (Boss1)
 	{
 		HpPercent = Boss1->NowHp / Boss1->MaxHp;
-		if (Boss1->NowIronCount > 0)
+		if (UIIronCount != Boss1->NowIronCount)
 		{
-			IsEatIron[Boss1->NowIronCount - 1] = true;
+			for (int32 i = UIIronCount; i < Boss1->NowIronCount; i++)
+				IsEatIron[i] = true;
+			UIIronCount = Boss1->NowIronCount;
 		}
 
 		if (Boss1->Phase == 1 && Boss1->IsActivate)

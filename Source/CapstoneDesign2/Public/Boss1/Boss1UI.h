@@ -29,4 +29,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	FString TimerString = TEXT("");
+
+private:
+	int32 UIIronCount = 0;	
 };

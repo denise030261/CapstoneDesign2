@@ -93,7 +93,10 @@ ABoss1::ABoss1()
 	
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AnimDieMontage(TEXT("/Script/Engine.AnimMontage'/Game/CapstoneDesign/Blueprints/Boss/Boss1/AM_Boss1_Die.AM_Boss1_Die'"));
 	if (AnimDieMontage.Succeeded()) DieMontage = AnimDieMontage.Object;
-
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> SpawnSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/03_Defiant_Roar_Cue.03_Defiant_Roar_Cue'"));
+	if (SpawnSoundAsset.Succeeded()) SpawnSound = SpawnSoundAsset.Object;
+	
 	static ConstructorHelpers::FObjectFinder<USoundCue> EatSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/04_Signal_Roar_Cue.04_Signal_Roar_Cue'"));
 	if (EatSoundAsset.Succeeded()) EatSound = EatSoundAsset.Object;
 	
@@ -105,6 +108,12 @@ ABoss1::ABoss1()
 	
 	static ConstructorHelpers::FObjectFinder<USoundCue> MeleeAttackStartSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/swoosh-6-235279_Cue.swoosh-6-235279_Cue'"));
 	if (MeleeAttackStartSoundAsset.Succeeded()) MeleeAttackStartSound = MeleeAttackStartSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> MeleeAttackHitSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DarkCue/Impact_Guts_Gore_01_Cue.Impact_Guts_Gore_01_Cue'"));
+	if (MeleeAttackHitSoundAsset.Succeeded()) MeleeAttackHitSound = MeleeAttackHitSoundAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> HealStartSoundAsset(TEXT("//Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/02_Ferocious_Roar_Cue.02_Ferocious_Roar_Cue'"));
+	if (HealStartSoundAsset.Succeeded()) HealStartSound = HealStartSoundAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -182,6 +191,7 @@ void ABoss1::OnOverlapBegin_Weapon(UPrimitiveComponent* OverlappedComponent, AAc
 		{
 			Player->SetCharacterHP(-MeleeAttackDamage * FMath::Pow(EatIronDamageFactor, NowIronCount));
 			CanDamageMeleeAttack = false;
+			UGameplayStatics::PlaySoundAtLocation(this, MeleeAttackHitSound, SweepResult.Location);
 		}
 	}
 }
@@ -634,6 +644,8 @@ void ABoss1::HealStart()
 		GetCharacterMovement()->MaxWalkSpeed = MoveSpeedBase2;
 	}
 	, HealSecond, false);
+
+	UGameplayStatics::PlaySoundAtLocation(this, HealStartSound, GetActorLocation());
 }
 
 void ABoss1::SetPhase1()
@@ -651,6 +663,7 @@ void ABoss1::SetPhase1()
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ABoss1::SetStateIdle, 2.0f, false);
 	
 	GetMesh()->GetAnimInstance()->Montage_Play(SpawnMontage);
+	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
 }
 
 void ABoss1::SetPhase2()
@@ -680,6 +693,7 @@ void ABoss1::SetPhase2()
 	constexpr float SpawnTime = 3.0f;
 	InitGrow(GetActorRelativeScale3D().X, FMath::Pow(EatIronScaleFactor, MaxIronCount), SpawnTime);
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ABoss1::SetStateIdle, SpawnTime, false);
+	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
 }
 
 void ABoss1::SetPhase3()
@@ -698,12 +712,8 @@ void ABoss1::SetPhase3()
 	FTimerHandle SetRageHandle;
 	constexpr float GrowTime = 3.0f;
 	InitGrow(GetActorRelativeScale3D().X, GetActorRelativeScale3D().X * 1.5f, GrowTime);
-	GetWorldTimerManager().SetTimer(SetRageHandle, [&]
-	{
-		SetStateIdle();
-	},
-	GrowTime,
-	false);
+	GetWorldTimerManager().SetTimer(SetRageHandle, this, &ABoss1::SetStateIdle, GrowTime, false);
+	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
 }
 
 void ABoss1::SetDie()
