@@ -12,6 +12,7 @@
 #include "Components/AudioComponent.h"
 #include "Boss1.generated.h"
 
+class UBoxComponent;
 class UNiagaraComponent;
 class ABoss1_Iron;
 class ABoss1_IronGenerator;
