@@ -15,7 +15,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "NiagaraComponent.h"
+#include "CapstoneDesign2/System/MyGameInstance.h"
 #include "Components/AudioComponent.h"
+#include "Internationalization/StringTable.h"
 #include "Sound/SoundCue.h"
 
 // Sets default values
@@ -112,8 +114,11 @@ ABoss1::ABoss1()
 	static ConstructorHelpers::FObjectFinder<USoundCue> MeleeAttackHitSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/SmallSoundKit/SSKCue/DarkCue/Impact_Guts_Gore_01_Cue.Impact_Guts_Gore_01_Cue'"));
 	if (MeleeAttackHitSoundAsset.Succeeded()) MeleeAttackHitSound = MeleeAttackHitSoundAsset.Object;
 	
-	static ConstructorHelpers::FObjectFinder<USoundCue> HealStartSoundAsset(TEXT("//Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/02_Ferocious_Roar_Cue.02_Ferocious_Roar_Cue'"));
+	static ConstructorHelpers::FObjectFinder<USoundCue> HealStartSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/02_Ferocious_Roar_Cue.02_Ferocious_Roar_Cue'"));
 	if (HealStartSoundAsset.Succeeded()) HealStartSound = HealStartSoundAsset.Object;
+
+	static ConstructorHelpers::FObjectFinder<UStringTable> QuestTextStringTableAsset(TEXT("/Script/Engine.StringTable'/Game/CapstoneDesign/Blueprints/Boss/Boss1/ST_Boss1QuestTexts.ST_Boss1QuestTexts'"));
+	if (QuestTextStringTableAsset.Succeeded()) QuestTextStringTable = QuestTextStringTableAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -645,10 +650,14 @@ void ABoss1::HealStart()
 		SetStateIdle();
 		ShieldParticleComp->DeactivateImmediate();
 		GetCharacterMovement()->MaxWalkSpeed = MoveSpeedBase2;
+		
+		SetQuestStringFromStringTable(TEXT("Phase2Return"));
 	}
 	, HealSecond, false);
 
 	UGameplayStatics::PlaySoundAtLocation(this, HealStartSound, GetActorLocation());
+	
+	SetQuestStringFromStringTable(TEXT("HealStart"));
 }
 
 void ABoss1::SetPhase1()
@@ -667,6 +676,8 @@ void ABoss1::SetPhase1()
 	
 	GetMesh()->GetAnimInstance()->Montage_Play(SpawnMontage);
 	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	
+	SetQuestStringFromStringTable(TEXT("Phase1Start"));
 }
 
 void ABoss1::SetPhase2()
@@ -697,6 +708,8 @@ void ABoss1::SetPhase2()
 	InitGrow(GetActorRelativeScale3D().X, FMath::Pow(EatIronScaleFactor, MaxIronCount), SpawnTime);
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ABoss1::SetStateIdle, SpawnTime, false);
 	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	
+	SetQuestStringFromStringTable(TEXT("Phase2Start"));
 }
 
 void ABoss1::SetPhase3()
@@ -717,6 +730,8 @@ void ABoss1::SetPhase3()
 	InitGrow(GetActorRelativeScale3D().X, GetActorRelativeScale3D().X * 1.5f, GrowTime);
 	GetWorldTimerManager().SetTimer(SetRageHandle, this, &ABoss1::SetStateIdle, GrowTime, false);
 	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	
+	SetQuestStringFromStringTable(TEXT("Phase3Start"));
 }
 
 void ABoss1::SetDie()
@@ -755,4 +770,15 @@ FRotator ABoss1::CalcSmoothLookAtRotation(const FVector& Location, float DeltaTi
 	const FRotator SmoothRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 10.0f);
 
 	return SmoothRotation;
+}
+
+void ABoss1::SetQuestStringFromStringTable(const FString& Key) const
+{
+	if (UMyGameInstance* GameInstance = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		if (QuestTextStringTable)
+		{
+			GameInstance->QuestString = FText::FromStringTable(QuestTextStringTable->GetStringTableId(), Key).ToString();
+		}
+	}
 }
