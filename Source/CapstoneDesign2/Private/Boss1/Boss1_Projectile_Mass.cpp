@@ -25,6 +25,11 @@ ABoss1_Projectile_Mass::ABoss1_Projectile_Mass()
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Mass::OnBeginOverlap);
 	RootComponent = CollisionComponent;
 
+	CoreCollider = CreateDefaultSubobject<USphereComponent>(FName("CoreCollider"));
+	CoreCollider->InitSphereRadius(1.0f);
+	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Mass::OnCoreBeginOverlap);
+	CollisionComponent->SetupAttachment(RootComponent);
+
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
 	MeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -100.0f));
 	MeshComponent->SetRelativeScale3D(FVector(2.0f));
@@ -85,7 +90,14 @@ void ABoss1_Projectile_Mass::OnBeginOverlap(UPrimitiveComponent* OverlappedCompo
 			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation());
 			Destroy();
 		}
-		else if (OtherActor->IsA(ALandscape::StaticClass()))
+	}
+}
+
+void ABoss1_Projectile_Mass::OnCoreBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != this) // 자신과의 겹침을 방지
+	{
+		if (OtherActor->IsA(ALandscape::StaticClass()))
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation());
 			Destroy();

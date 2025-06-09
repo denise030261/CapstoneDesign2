@@ -6,6 +6,7 @@
 #include "Landscape.h"
 #include "CapstoneDesign2/MainCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -25,6 +26,11 @@ ABoss1_Projectile_Needle::ABoss1_Projectile_Needle()
 	CollisionComponent->SetRelativeScale3D(FVector(1.0f));
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Needle::OnBeginOverlap);
 	RootComponent = CollisionComponent;
+
+	CoreCollider = CreateDefaultSubobject<USphereComponent>(FName("CoreCollider"));
+	CoreCollider->InitSphereRadius(1.0f);
+	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Needle::OnCoreBeginOverlap);
+	CollisionComponent->SetupAttachment(RootComponent);
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
 	MeshComponent->SetRelativeLocation(FVector(-87.0f, 0.0f, 0.0f));
@@ -87,7 +93,14 @@ void ABoss1_Projectile_Needle::OnBeginOverlap(UPrimitiveComponent* OverlappedCom
 			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation(), RemovalSoundVolumeMultiplier);
 			Destroy();
 		}
-		else if (OtherActor->IsA(ALandscape::StaticClass()))
+	}
+}
+
+void ABoss1_Projectile_Needle::OnCoreBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != this) // 자신과의 겹침을 방지
+	{
+		if (OtherActor->IsA(ALandscape::StaticClass()))
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation(), RemovalSoundVolumeMultiplier);
 			Destroy();

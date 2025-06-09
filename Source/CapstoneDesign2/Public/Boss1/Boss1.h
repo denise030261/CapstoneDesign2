@@ -12,6 +12,7 @@
 #include "Components/AudioComponent.h"
 #include "Boss1.generated.h"
 
+class UBoxComponent;
 class UNiagaraComponent;
 class ABoss1_Iron;
 class ABoss1_IronGenerator;
@@ -222,6 +223,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
 	USoundCue* HealStartSound;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Text")
+	UStringTable* QuestTextStringTable;
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -282,6 +286,8 @@ private:
 	float GrowTotalTime;
 
 	FRotator CalcSmoothLookAtRotation(const FVector& Location, float DeltaTime) const;
+
+	void SetQuestStringFromStringTable(const FString& Key) const;
 	
 	FTimerHandle Phase1TimerHandle;
 	FTimerHandle IdleTimerHandle;
