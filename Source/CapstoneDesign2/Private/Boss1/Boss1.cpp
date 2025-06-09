@@ -16,6 +16,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "NiagaraComponent.h"
 #include "CapstoneDesign2/System/MyGameInstance.h"
+#include "CapstoneDesign2/Talisman/FireAttribute.h"
 #include "Components/AudioComponent.h"
 #include "Internationalization/StringTable.h"
 #include "Sound/SoundCue.h"
@@ -164,6 +165,7 @@ void ABoss1::Tick(float DeltaTime)
 	{
 		if (IsActivate)
 		{
+			NowHp -= DeltaTime * 15.0f;
 			HealRemainSecond -= DeltaTime;
 		}
 		UpdateWeaponCollider();
@@ -203,7 +205,7 @@ void ABoss1::OnOverlapBegin_Weapon(UPrimitiveComponent* OverlappedComponent, AAc
 	
 void ABoss1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
-	if (FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName() && (State != EBoss1_State::Spawn || State != EBoss1_State::Die))
+	if (DataAsset && FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName() && (State != EBoss1_State::Spawn || State != EBoss1_State::Die))
 	{
 		if (Phase == 1 || IsHealPattern)
 		{
