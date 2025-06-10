@@ -43,6 +43,12 @@ public:
     UPROPERTY(BlueprintReadWrite)
     FString QuestString;
 
+    UFUNCTION(BlueprintCallable)
+    FString GetQuestString() const { return QuestString; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetQuestString(FString Str) { QuestString = Str; }
+
     UPROPERTY(BlueprintReadWrite)
     FString RepresentativeQuestString;
 
@@ -75,4 +81,10 @@ public:
 
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool KillBossProcess;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool PattenrnFire;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+    bool PatternWind;
 };

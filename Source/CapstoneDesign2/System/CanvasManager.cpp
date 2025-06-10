@@ -112,6 +112,7 @@ bool ACanvasManager::CheckAllAnswersAndReset()
     {
         const TArray<bool>& TargetPattern = AnswerPatterns[PatternIndex];
         bool bMatch = true;
+        int32 MismatchCount = 0;
 
         for (int32 i = 0; i < CanvasActors.Num(); ++i)
         {
@@ -125,8 +126,12 @@ bool ACanvasManager::CheckAllAnswersAndReset()
 
             if (bIsOn != bAnswer)
             {
-                bMatch = false;
-                break;
+                MismatchCount++;
+                if (MismatchCount > 1) // 오차 허용 1칸까지
+                {
+                    bMatch = false;
+                    break;
+                }
             }
         }
 
@@ -147,6 +152,8 @@ bool ACanvasManager::CheckAllAnswersAndReset()
 				break;
 			default:
 				UE_LOG(LogTemp, Warning, TEXT(" Unknown pattern index: %d"), PatternIndex);
+
+                Cast<UMyGameInstance>(GetGameInstance())->NoPattern = true;
 			}
             break;
         }
