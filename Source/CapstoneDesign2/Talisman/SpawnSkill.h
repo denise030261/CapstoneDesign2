@@ -57,6 +57,9 @@ public:
 	UFUNCTION()
 	void SetTalisman(ATalisman* Talisman);
 
+	UPROPERTY()
+	TSet<AActor*> OverlappingDamageableActors;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -71,5 +74,5 @@ private:
 	FVector3d TargetDistance;
 
 	UFUNCTION()
-	void RepeatAttack(AActor* OtherActor);
+	void RepeatAttack();
 };

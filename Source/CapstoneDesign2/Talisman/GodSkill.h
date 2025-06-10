@@ -6,6 +6,7 @@
 #include "TalismanSkillStrategy.h"
 #include <Runtime/LevelSequence/Public/LevelSequence.h>
 #include <Runtime/LevelSequence/Public/LevelSequencePlayer.h>
+#include "TalismanDataAsset.h"
 #include "GodSkill.generated.h"
 
 /**
@@ -21,6 +22,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	ULevelSequence* LevelSequence;
+
+	UPROPERTY(EditAnywhere)
+	UTalismanDataAsset* TalismanDataAsset;
 
 private:
 	ULevelSequencePlayer* LevelSequencePlayer;
