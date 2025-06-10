@@ -66,42 +66,79 @@ void ASpawnSkill::Tick(float DeltaTime)
 
 void ASpawnSkill::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
+	if (OtherActor->ActorHasTag("Player"))
 	{
-		RepeatAttack(OtherActor);
+		return;
+	}
 
-		FTimerDelegate AttackDelegate;
-		AttackDelegate.BindUFunction(this, FName("RepeatAttack"), OtherActor);
-		GetWorld()->GetTimerManager().SetTimer(AttackHandle, AttackDelegate, StayTime, false);
+	IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);
+	if (OtherActor && InterfaceRef)
+	{
+		OverlappingDamageableActors.Add(OtherActor);
+
+		if (!GetWorld()->GetTimerManager().IsTimerActive(AttackHandle))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s: First actor entered, starting attack timer. Target: %s"), *GetName(), *OtherActor->GetName());
+
+			GetWorld()->GetTimerManager().SetTimer(
+				AttackHandle,
+				this,
+				&ASpawnSkill::RepeatAttack, 
+				StayTime, 
+				true 
+			);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s: Another actor entered, timer already active. Current active targets: %d"), *GetName(), OverlappingDamageableActors.Num());
+			return;
+		}
+
+		InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
 	}
 }
 
 void ASpawnSkill::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);
-	if (InterfaceRef)
+	if (OtherActor && InterfaceRef)
 	{
-		if (TalismanDataAsset)
+		OverlappingDamageableActors.Remove(OtherActor);
+		UE_LOG(LogTemp, Log, TEXT("%s: Actor %s left. Remaining targets: %d"), *GetName(), *OtherActor->GetName(), OverlappingDamageableActors.Num());
+
+		if (OverlappingDamageableActors.Num() == 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s Done Attack"), *GetName());
 			GetWorld()->GetTimerManager().ClearTimer(AttackHandle);
 		}
 	}
 }
 
-void ASpawnSkill::RepeatAttack(AActor* OtherActor)
+void ASpawnSkill::RepeatAttack()
 {
-	IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);
-	if (InterfaceRef)
+	if (!TalismanDataAsset)
 	{
-		if (TalismanDataAsset)
+		UE_LOG(LogTemp, Error, TEXT("TalismanDataAsset is null in RepeatAttack!"));
+		GetWorld()->GetTimerManager().ClearTimer(AttackHandle);
+		return;
+	}
+
+	int32 DamagedCount = 0;
+	for (AActor* Target : OverlappingDamageableActors) 
+	{
+		if (Target && Target->IsValidLowLevel()) 
 		{
-			InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
+			IDamageable* InterfaceRef = Cast<IDamageable>(Target);
+			if (InterfaceRef)
+			{
+				InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
+				DamagedCount++;
+			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No TalismanDataAsset"));
-		}
+	}
+
+	if (OverlappingDamageableActors.Num() == 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AttackHandle);
 	}
 }
 

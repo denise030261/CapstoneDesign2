@@ -31,6 +31,9 @@ ABoss1_MeleeAttackShock::ABoss1_MeleeAttackShock()
 	static ConstructorHelpers::FObjectFinder<USoundCue> ShockSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/Shock_Cue.Shock_Cue'"));
 	if (ShockSoundAsset.Succeeded()) ShockSound = ShockSoundAsset.Object;
 	
+	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> ShockForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/ShockSoundForceFeedbackEffect.ShockSoundForceFeedbackEffect'"));
+	if (ShockForceFeedbackEffectAsset.Succeeded()) ShockForceFeedbackEffect = ShockForceFeedbackEffectAsset.Object;
+	
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleAsset(TEXT("/Script/Engine.ParticleSystem'/Game/ParagonGrux/FX/Particles/Skins/Grux_Beetle_Magma/P_MagmaHardknocks_AOE.P_MagmaHardknocks_AOE'"));
 	ParticleComponent->SetTemplate(ParticleAsset.Object);
 }
@@ -39,7 +42,8 @@ ABoss1_MeleeAttackShock::ABoss1_MeleeAttackShock()
 void ABoss1_MeleeAttackShock::BeginPlay()
 {
 	Super::BeginPlay();
-	UGameplayStatics::PlaySoundAtLocation(this, ShockSound, GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShockSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(GetWorld(), ShockForceFeedbackEffect, GetActorLocation());
 	FTimerHandle CanDealDamageHandle;
 	GetWorldTimerManager().SetTimer(CanDealDamageHandle, [&] { CanDealDamage = false; }, PersistentTime, false);
 }
