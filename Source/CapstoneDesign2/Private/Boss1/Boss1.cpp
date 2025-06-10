@@ -47,15 +47,13 @@ ABoss1::ABoss1()
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	
 	WeaponColliderL = CreateDefaultSubobject<UBoxComponent>(FName("WeaponCollider_L"));
-	WeaponColliderL->SetCollisionProfileName(FName("OverlapOnlyPawn"));
-	WeaponColliderL->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+	WeaponColliderL->SetCollisionProfileName(FName("Boss1Weapon"));
 	WeaponColliderL->OnComponentBeginOverlap.AddDynamic(this, &ABoss1::OnOverlapBegin_Weapon);
 	WeaponColliderL->SetRelativeScale3D(FVector(1.0f, 1.0f, 2.0f));
 	WeaponColliderL->SetupAttachment(GetMesh());
 
 	WeaponColliderR = CreateDefaultSubobject<UBoxComponent>(FName("WeaponCollider_R"));
-	WeaponColliderR->SetCollisionProfileName(FName("OverlapOnlyPawn"));
-	WeaponColliderR->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+	WeaponColliderR->SetCollisionProfileName(FName("Boss1Weapon"));
 	WeaponColliderR->OnComponentBeginOverlap.AddDynamic(this, &ABoss1::OnOverlapBegin_Weapon);
 	WeaponColliderR->SetRelativeScale3D(FVector(1.0f, 1.0f, 2.0f));
 	WeaponColliderR->SetupAttachment(GetMesh());
