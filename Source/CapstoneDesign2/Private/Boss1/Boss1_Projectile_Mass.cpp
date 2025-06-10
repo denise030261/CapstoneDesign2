@@ -48,6 +48,9 @@ ABoss1_Projectile_Mass::ABoss1_Projectile_Mass()
 	static ConstructorHelpers::FObjectFinder<USoundCue> RemovalSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/CapstoneDesign/Sounds/small-rock-break-194553_Cue.small-rock-break-194553_Cue'"));
 	if (RemovalSoundAsset.Succeeded()) RemovalSound = RemovalSoundAsset.Object;
 	
+	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> RemovalForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/SoundForceFeedbackEffect.SoundForceFeedbackEffect'"));
+	if (RemovalForceFeedbackEffectAsset.Succeeded()) RemovalForceFeedbackEffect = RemovalForceFeedbackEffectAsset.Object;
+	
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 1000.0f; // 초기 속도
 	ProjectileMovement->MaxSpeed = 1000.0f;
@@ -87,7 +90,7 @@ void ABoss1_Projectile_Mass::OnBeginOverlap(UPrimitiveComponent* OverlappedCompo
 		if (AMainCharacter* Player = Cast<AMainCharacter>(OtherActor))
 		{
 			Player->SetCharacterHP(-Damage);
-			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), RemovalSound, GetActorLocation());
 			Destroy();
 		}
 	}
@@ -99,7 +102,8 @@ void ABoss1_Projectile_Mass::OnCoreBeginOverlap(UPrimitiveComponent* OverlappedC
 	{
 		if (OtherActor->IsA(ALandscape::StaticClass()))
 		{
-			UGameplayStatics::PlaySoundAtLocation(this, RemovalSound, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), RemovalSound, GetActorLocation());
+			UGameplayStatics::SpawnForceFeedbackAtLocation(GetWorld(), RemovalForceFeedbackEffect, GetActorLocation());
 			Destroy();
 		}
 	}

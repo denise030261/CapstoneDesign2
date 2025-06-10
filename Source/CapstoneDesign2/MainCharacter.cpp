@@ -17,6 +17,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "Components/AudioComponent.h"
 #include "Sound/SoundCue.h"
+#include "GameFramework/PlayerController.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -485,6 +486,9 @@ void AMainCharacter::SetCharacterHP(int Num)
 	FTimerDelegate StunDelegate;
 	StunDelegate.BindUObject(this, &AMainCharacter::EnableMovement);
 	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, StunDelegate, Stun, false);
+	
+	if (ForceFeedback)
+		GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(ForceFeedback);
 }
 
 void AMainCharacter::EnableMovement()

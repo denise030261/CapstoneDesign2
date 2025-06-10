@@ -12,6 +12,7 @@
 #include "Components/AudioComponent.h"
 #include "Boss1.generated.h"
 
+class UForceFeedbackComponent;
 class UBoxComponent;
 class UNiagaraComponent;
 class ABoss1_Iron;
@@ -87,7 +88,7 @@ public:
 	bool IsActivate = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|HP", meta = (ClampMin = "0.0", Const))
-	float MaxHp = 5000.0f;
+	float MaxHp = 2500.0f;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "State|HP")
 	float NowHp;
@@ -108,7 +109,7 @@ public:
 	AMainCharacter* PlayerCharacter;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property|Phase1", meta = (ClampMin = "0.0", Const))
-	float Phase1Second = 60.0f;
+	float Phase1Second = 5.0f;
 	
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Property|Phase1")
 	float Phase1RemainSecond = Phase1Second;
@@ -223,6 +224,12 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Text")
 	UStringTable* QuestTextStringTable;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "GamePad")
+	UForceFeedbackEffect* GrowlForceFeedbackEffect;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "GamePad")
+	UForceFeedbackEffect* SoundForceFeedbackEffect;
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

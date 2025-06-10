@@ -36,6 +36,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundCue* RemovalSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GamePad")
+	UForceFeedbackEffect* RemovalForceFeedbackEffect;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
 	class UProjectileMovementComponent* ProjectileMovement;

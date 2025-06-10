@@ -128,6 +128,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	int NoDamageTime;
 
+	// Force Feedback (GamePad)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GamePad")
+	UForceFeedbackEffect * ForceFeedback;
+	
 protected:
 
 	/** Called for movement input */
