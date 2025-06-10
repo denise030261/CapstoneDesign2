@@ -47,11 +47,15 @@ ABoss1::ABoss1()
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	
 	WeaponColliderL = CreateDefaultSubobject<UBoxComponent>(FName("WeaponCollider_L"));
+	WeaponColliderL->SetCollisionProfileName(FName("OverlapOnlyPawn"));
+	WeaponColliderL->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 	WeaponColliderL->OnComponentBeginOverlap.AddDynamic(this, &ABoss1::OnOverlapBegin_Weapon);
 	WeaponColliderL->SetRelativeScale3D(FVector(1.0f, 1.0f, 2.0f));
 	WeaponColliderL->SetupAttachment(GetMesh());
 
 	WeaponColliderR = CreateDefaultSubobject<UBoxComponent>(FName("WeaponCollider_R"));
+	WeaponColliderR->SetCollisionProfileName(FName("OverlapOnlyPawn"));
+	WeaponColliderR->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 	WeaponColliderR->OnComponentBeginOverlap.AddDynamic(this, &ABoss1::OnOverlapBegin_Weapon);
 	WeaponColliderR->SetRelativeScale3D(FVector(1.0f, 1.0f, 2.0f));
 	WeaponColliderR->SetupAttachment(GetMesh());
@@ -62,13 +66,6 @@ ABoss1::ABoss1()
 	ShieldParticleComp->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ShieldParticleAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/MegaMagicVFXBundle/VFX/MagicShieldsVFX/VFX/DefaultVersions/MagmaShield/Systems/N_MagmaShield.N_MagmaShield'"));
 	if (ShieldParticleAsset.Succeeded()) ShieldParticleComp->SetAsset(ShieldParticleAsset.Object);
-
-	Phase3ParticleComp = CreateDefaultSubobject<UNiagaraComponent>(FName("Phase3 Particle"));
-	Phase3ParticleComp->bAutoActivate = false;
-	Phase3ParticleComp->SetAbsolute(false, true, false);
-	Phase3ParticleComp->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Phase3ParticleAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/MegaMagicVFXBundle/VFX/MagicAuraVFX/VFX/Tsunami/Systems/N_BossEffect.N_BossEffect'"));
-	if (Phase3ParticleAsset.Succeeded()) Phase3ParticleComp->SetAsset(Phase3ParticleAsset.Object);
 
 	FootstepSoundComp = CreateDefaultSubobject<UAudioComponent>(FName("Footstep Sound"));
 	FootstepSoundComp->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));

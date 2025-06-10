@@ -64,9 +64,6 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Component")
 	UNiagaraComponent* ShieldParticleComp;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Component")
-	UNiagaraComponent* Phase3ParticleComp;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Component")
 	UAudioComponent* FootstepSoundComp;
