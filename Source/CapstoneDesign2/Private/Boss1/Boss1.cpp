@@ -18,6 +18,7 @@
 #include "CapstoneDesign2/System/MyGameInstance.h"
 #include "CapstoneDesign2/Talisman/FireAttribute.h"
 #include "Components/AudioComponent.h"
+#include "Components/ForceFeedbackComponent.h"
 #include "Internationalization/StringTable.h"
 #include "Sound/SoundCue.h"
 
@@ -115,6 +116,12 @@ ABoss1::ABoss1()
 
 	static ConstructorHelpers::FObjectFinder<UStringTable> QuestTextStringTableAsset(TEXT("/Script/Engine.StringTable'/Game/CapstoneDesign/Blueprints/Boss/Boss1/ST_Boss1QuestTexts.ST_Boss1QuestTexts'"));
 	if (QuestTextStringTableAsset.Succeeded()) QuestTextStringTable = QuestTextStringTableAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> GrowlForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/GrowlForceFeedbackEffect.GrowlForceFeedbackEffect'"));
+	if (GrowlForceFeedbackEffectAsset.Succeeded()) GrowlForceFeedbackEffect = GrowlForceFeedbackEffectAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> SoundForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/SoundForceFeedbackEffect.SoundForceFeedbackEffect'"));
+	if (SoundForceFeedbackEffectAsset.Succeeded()) SoundForceFeedbackEffect = SoundForceFeedbackEffectAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -160,7 +167,7 @@ void ABoss1::Tick(float DeltaTime)
 	{
 		if (IsActivate)
 		{
-			NowHp -= DeltaTime * 15.0f;
+			NowHp -= DeltaTime * 7.5f;
 			HealRemainSecond -= DeltaTime;
 		}
 		UpdateWeaponCollider();
@@ -323,6 +330,7 @@ void ABoss1::EatIron(ABoss1_Iron* Iron)
 	State = EBoss1_State::Eating;
 
 	UGameplayStatics::PlaySoundAtLocation(this, EatSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	if (Phase == 1)
 	{
@@ -441,6 +449,7 @@ void ABoss1::ShootNeedleStart()
 	State = EBoss1_State::Aiming;
 	PatternState = EBoss1_Pattern_State::ShootNeedle;
 	UGameplayStatics::PlaySoundAtLocation(this, PatternStartSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	GetMesh()->GetAnimInstance()->Montage_Play(PatternMontage);
 }
 
@@ -481,6 +490,7 @@ void ABoss1::ThrowMassStart()
 	State = EBoss1_State::Aiming;
 	PatternState = EBoss1_Pattern_State::ThrowMass;
 	UGameplayStatics::PlaySoundAtLocation(this, PatternStartSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	GetMesh()->GetAnimInstance()->Montage_Play(PatternMontage);
 }
 
@@ -572,6 +582,7 @@ void ABoss1::MeleeAttackStart()
 	State = EBoss1_State::Aiming;
 	PatternState = EBoss1_Pattern_State::MeleeAttack;
 	UGameplayStatics::PlaySoundAtLocation(this, MeleeAttackStartSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, SoundForceFeedbackEffect, GetActorLocation());
 	GetMesh()->GetAnimInstance()->Montage_Play(MeleeAttackMontages[FMath::RandRange(0, MeleeAttackMontages.Num() - 1)]);
 }
 
@@ -654,6 +665,7 @@ void ABoss1::HealStart()
 	, HealSecond, false);
 
 	UGameplayStatics::PlaySoundAtLocation(this, HealStartSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("HealStart"));
 }
@@ -674,6 +686,7 @@ void ABoss1::SetPhase1()
 	
 	GetMesh()->GetAnimInstance()->Montage_Play(SpawnMontage);
 	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("Phase1Start"));
 }
@@ -706,6 +719,7 @@ void ABoss1::SetPhase2()
 	InitGrow(GetActorRelativeScale3D().X, FMath::Pow(EatIronScaleFactor, MaxIronCount), SpawnTime);
 	GetWorldTimerManager().SetTimer(SpawnHandle, this, &ABoss1::SetStateIdle, SpawnTime, false);
 	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("Phase2Start"));
 }
@@ -728,6 +742,7 @@ void ABoss1::SetPhase3()
 	InitGrow(GetActorRelativeScale3D().X, GetActorRelativeScale3D().X * 1.5f, GrowTime);
 	GetWorldTimerManager().SetTimer(SetRageHandle, this, &ABoss1::SetStateIdle, GrowTime, false);
 	UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("Phase3Start"));
 }

@@ -21,16 +21,16 @@ void UBoss1UI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		if (Boss1->Phase == 1 && Boss1->IsActivate)
 		{
 			const int32 Time = FMath::FloorToInt(Boss1->Phase1RemainSecond);
-			const int32 Minute = Time / 60;
-			const int32 Second = Time % 60;
+			const int32 Minute = Time >= 0 ? Time / 60 : 0;
+			const int32 Second = Time >= 0 ? Time % 60 : 0;
 			
 			TimerString = FString::Printf(TEXT("%02d:%02d"), Minute, Second);
 		}
 		else if (Boss1->IsHealPattern)
 		{
 			const int32 Time = FMath::FloorToInt(Boss1->HealRemainSecond);
-			const int32 Minute = Time / 60;
-			const int32 Second = Time % 60;
+			const int32 Minute = Time >= 0 ? Time / 60 : 0;
+			const int32 Second = Time >= 0 ? Time % 60 : 0;
 			
 			TimerString = FString::Printf(TEXT("%02d:%02d"), Minute, Second);
 		}

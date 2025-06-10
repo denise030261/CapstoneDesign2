@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USoundCue* ShockSound;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GamePad")
+	UForceFeedbackEffect* ShockForceFeedbackEffect;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float Damage = 10.0f;
 

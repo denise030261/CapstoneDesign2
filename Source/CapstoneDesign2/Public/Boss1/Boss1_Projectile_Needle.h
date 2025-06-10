@@ -38,7 +38,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundCue* RemovalSound;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "GamePad")
+	UForceFeedbackEffect* RemovalForceFeedbackEffect;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Sound")
 	float RemovalSoundVolumeMultiplier = 1.0f;
 	
