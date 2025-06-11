@@ -126,7 +126,6 @@ ABoss1::ABoss1()
 	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> HitForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/SkillHitForceFeedbackEffect.SkillHitForceFeedbackEffect'"));
 	if (HitForceFeedbackEffectAsset.Succeeded()) HitForceFeedbackEffect = HitForceFeedbackEffectAsset.Object;
 }
-
 // Called when the game starts or when spawned
 void ABoss1::BeginPlay()
 {
@@ -141,6 +140,17 @@ void ABoss1::BeginPlay()
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnEndOnceNotify.AddDynamic(this, &ABoss1::ShootNeedleEnd);
 
 	SetPhase1();
+}
+
+void ABoss1::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	GetWorldTimerManager().ClearTimer(IdleTimerHandle);
+	GetWorldTimerManager().ClearTimer(CastingTimerHandle);
+	GetWorldTimerManager().ClearAllTimersForObject(IronGenerator);
+	for (FTimerHandle ShockHandle : ShockHandles)
+	{
+		GetWorldTimerManager().ClearTimer(ShockHandle);
+	}
 }
 
 // Called every frame
@@ -603,20 +613,25 @@ void ABoss1::MeleeAttack()
 	Direction.Z = 0;
 	Direction.Normalize();
 	int32 i = 1;
-	
-	FTimerHandle ShockHandle;
-	GetWorldTimerManager().SetTimer(ShockHandle, [&, Rotation, StartLocation, Direction, i, this]() mutable
+
+	FTimerHandle ShockTimerHandle;
+	ShockHandles.Add(ShockTimerHandle);
+	GetWorldTimerManager().SetTimer(ShockTimerHandle, [&, Rotation, StartLocation, Direction, i, this]() mutable
 	{
 		if (i > 10)
 		{
-			GetWorldTimerManager().ClearTimer(ShockHandle);
+			GetWorldTimerManager().ClearTimer(ShockTimerHandle);
+			ShockHandles.Remove(ShockTimerHandle);
 			return;
 		}
 
 		const FVector Location = StartLocation + Direction * 500.0f * i;
 		ABoss1_MeleeAttackShock* Shock = GetWorld()->SpawnActor<ABoss1_MeleeAttackShock>(MeleeAttackShock, Location, Rotation);
-		Shock->SetActorRelativeScale3D(Shock->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
-		Shock->Damage = MeleeAttackShockDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
+		if (IsValid(Shock))
+		{
+			Shock->SetActorRelativeScale3D(Shock->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
+			Shock->Damage = MeleeAttackShockDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
+		}
 		i++;
 		
 #if WITH_EDITOR

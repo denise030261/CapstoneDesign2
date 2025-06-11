@@ -48,10 +48,11 @@ class CAPSTONEDESIGN2_API ABoss1 : public ACharacter, public IDamageable
 public:
 	// Sets default values for this character's properties
 	ABoss1();
-
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame
@@ -299,5 +300,6 @@ private:
 	FTimerHandle Phase1TimerHandle;
 	FTimerHandle IdleTimerHandle;
 	FTimerHandle CastingTimerHandle;
+	TArray<FTimerHandle> ShockHandles;
 	FTimerHandle HealTimerHandle;
 };
