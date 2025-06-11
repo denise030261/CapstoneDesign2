@@ -8,6 +8,7 @@
 #include "CapstoneDesign2/Talisman/FireAttribute.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Monsters/MonsterUI.h"
 
@@ -26,6 +27,9 @@ AMonsterBase::AMonsterBase()
 	MonsterUI->SetWidgetSpace(EWidgetSpace::World);
 	MonsterUI->SetBlendMode(EWidgetBlendMode::Transparent);
 	MonsterUI->SetupAttachment(RootComponent);
+	
+	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> HitForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/SkillHitForceFeedbackEffect.SkillHitForceFeedbackEffect'"));
+	if (HitForceFeedbackEffectAsset.Succeeded()) HitForceFeedbackEffect = HitForceFeedbackEffectAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -61,6 +65,7 @@ void AMonsterBase::DealDamage(float DamageAmount, const UTalismanDataAsset* Data
 {
 	NowHp = FMath::Clamp(NowHp - DamageAmount, 0.0f, MaxHp);
 	Cast<UMonsterUI>(MonsterUI->GetUserWidgetObject())->SetHp(NowHp);
+	UGameplayStatics::SpawnForceFeedbackAtLocation(this, HitForceFeedbackEffect, GetActorLocation());
 		
 	if (NowHp <= 0)
 	{

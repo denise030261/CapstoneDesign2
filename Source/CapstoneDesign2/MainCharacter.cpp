@@ -257,6 +257,9 @@ void AMainCharacter::Attack()
 
 		ThrowTalisman(); // Spawn Talisman
 		PlayAttackAnimation(TalismanObject); // Play animation about Talisman
+		
+		if (SkillForceFeedback)
+			GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(SkillForceFeedback);
 	}
 	else
 	{
@@ -489,8 +492,8 @@ void AMainCharacter::SetCharacterHP(int Num)
 	StunDelegate.BindUObject(this, &AMainCharacter::EnableMovement);
 	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, StunDelegate, Stun, false);
 	
-	if (ForceFeedback)
-		GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(ForceFeedback);
+	if (HitForceFeedback)
+		GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(HitForceFeedback);
 }
 
 void AMainCharacter::EnableMovement()
