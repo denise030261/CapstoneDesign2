@@ -82,6 +82,11 @@ public:
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool KillBossProcess;
 
+    bool GetKillBossProcess() const { return KillBossProcess; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetKillBossProcess(bool b) { KillBossProcess = b; }
+
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool PattenrnFire;
 
