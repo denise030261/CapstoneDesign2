@@ -293,6 +293,7 @@ private:
 
 	void HealStart();
 
+	UFUNCTION(BlueprintCallable)
 	void SetPhase1();
 	void SetPhase2();
 	void SetPhase3();
