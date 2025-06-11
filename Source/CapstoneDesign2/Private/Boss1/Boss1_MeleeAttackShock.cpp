@@ -44,7 +44,6 @@ void ABoss1_MeleeAttackShock::BeginPlay()
 	Super::BeginPlay();
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShockSound, GetActorLocation());
 	UGameplayStatics::SpawnForceFeedbackAtLocation(GetWorld(), ShockForceFeedbackEffect, GetActorLocation());
-	FTimerHandle CanDealDamageHandle;
 	GetWorldTimerManager().SetTimer(CanDealDamageHandle, [&] { CanDealDamage = false; }, PersistentTime, false);
 }
 
@@ -63,6 +62,7 @@ void ABoss1_MeleeAttackShock::OnBeginOverlap(UPrimitiveComponent* OverlappedComp
 
 void ABoss1_MeleeAttackShock::OnParticleSystemFinished(UParticleSystemComponent* PSystem)
 {
+	GetWorldTimerManager().ClearTimer(CanDealDamageHandle);
 	Destroy();
 }
 

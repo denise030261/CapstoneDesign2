@@ -69,6 +69,7 @@ void AMainCharacter::BeginPlay()
 	bNoDamage = false;
 	InitCharacterHP();
 	InitTalismanState();
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
 	AnimInst = GetMesh()->GetAnimInstance();
 	if (AnimInst)
@@ -476,7 +477,7 @@ void AMainCharacter::SetCharacterHP(int Num)
 	else if (Num < DamageArea[1])
 	{
 		DamageLevel = 2;
-		Stun = 3;
+		Stun = 6;
 	} // Fall Down
 
 	if (DamageMontages[DamageLevel])
@@ -505,14 +506,22 @@ void AMainCharacter::EnableMovement()
 	} // Bigest Damage
 	else if (DamageLevel == 3)
 	{
-		GetWorldSettings()->SetTimeDilation(0.f);
-		// Show UI Widget
-		return;
+		DieWidget = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), DieWidgetClass);
+		if (DieWidget)
+		{
+			DieWidget->AddToViewport();
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetWidgetToFocus(DieWidget->TakeWidget());
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+			GetWorld()->GetFirstPlayerController()->SetInputMode(InputModeData);
+			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+		} 
 	} // Die
 
 	// No Damage Time
 	AddNoDamage();
-	EnableInput(PC);
+	EnableInput(GetWorld()->GetFirstPlayerController());
 	bAttacking = false;
 }
 

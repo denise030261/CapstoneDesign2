@@ -47,5 +47,8 @@ public:
 
 	UFUNCTION()
 	void OnParticleSystemFinished(UParticleSystemComponent* PSystem);
+
+private:
+	FTimerHandle CanDealDamageHandle;
 };
 
