@@ -627,14 +627,18 @@ void ABoss1::MeleeAttack()
 	Direction.Normalize();
 	int32 i = 1;
 
+	TWeakObjectPtr<ABoss1> WeakThis = this; 
 	FTimerHandle ShockTimerHandle;
 	ShockHandles.Add(ShockTimerHandle);
-	GetWorldTimerManager().SetTimer(ShockTimerHandle, [&, Rotation, StartLocation, Direction, i, this]() mutable
+	GetWorldTimerManager().SetTimer(ShockTimerHandle, [&, Rotation, StartLocation, Direction, i, WeakThis]() mutable
 	{
 		if (i > 10)
 		{
-			GetWorldTimerManager().ClearTimer(ShockTimerHandle);
-			ShockHandles.Remove(ShockTimerHandle);
+			if (WeakThis.IsValid())
+			{
+				GetWorldTimerManager().ClearTimer(ShockTimerHandle);
+				ShockHandles.Remove(ShockTimerHandle);
+			}
 			return;
 		}
 
