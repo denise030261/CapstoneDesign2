@@ -152,7 +152,7 @@ void ABoss1::BeginPlay()
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnThrowMassAimingEndNotify.AddDynamic(this, &ABoss1::ThrowMass);
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnEndOnceNotify.AddDynamic(this, &ABoss1::ShootNeedleEnd);
 
-	SetPhase1();
+	//SetPhase1();
 }
 
 void ABoss1::EndPlay(const EEndPlayReason::Type EndPlayReason)
