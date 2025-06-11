@@ -39,14 +39,14 @@ ATalisman::ATalisman()
 
 void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SetActorTickEnabled(false); // Don't Tick
-
-	bool bTarget = false;
-
-	if (ActorHasTag("Player"))
+	if (OtherActor == GetWorld()->GetFirstPlayerController()->GetCharacter() || OtherActor == this)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Contact Player"));
 		return;
 	}
+
+	SetActorTickEnabled(false); // Don't Tick
+	bool bTarget = false;
 	if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
 	{
 		IDamageable* InterfaceRef = Cast<IDamageable>(OtherActor);

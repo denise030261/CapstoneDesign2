@@ -365,7 +365,8 @@ bool AMainCharacter::bAttackEnable()
 void AMainCharacter::ThrowTalisman()
 {
 	FVector ForwardDirection = FRotationMatrix(ThrowRotation).GetUnitAxis(EAxis::X);
-	FVector ThrowLocation = GetActorLocation() + ForwardDirection * 200;
+	FVector ThrowLocation = GetActorLocation() + ForwardDirection * 25;
+	//ThrowRotation += FRotator(0, 90, 0);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -388,11 +389,12 @@ void AMainCharacter::ThrowTalisman()
 		if (Executor)
 		{
 			Executor->SkillExecute(TalismanInstance, GetWorld());  
+			//ThrowRotation -= FRotator(0, 90, 0);
 		}
 	}
 
 	// Talisman Fly Effect
-	FRotator RotateRotation(0, -85, 0);
+	FRotator RotateRotation(0, 0, 180);
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 		TalismanInstance->TalismanDataAsset->SkillInfo.Effect,
 		TalismanInstance->GetRootComponent(),   

@@ -207,7 +207,6 @@ void ABoss1::OnOverlapBegin_Weapon(UPrimitiveComponent* OverlappedComponent, AAc
 	
 void ABoss1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Damage : %f"), DamageAmount);
 	if (DataAsset && FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName() && (State != EBoss1_State::Spawn || State != EBoss1_State::Die))
 	{
 		if (Phase == 1 || IsHealPattern)

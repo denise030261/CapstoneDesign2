@@ -5,6 +5,7 @@
 #include <Kismet/GameplayStatics.h>
 #include <NiagaraFunctionLibrary.h>
 #include "SpawnSkill.h"
+#include <Damageable.h>
 
 void URangeAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
@@ -51,7 +52,6 @@ void URangeAttack::Bomb(ATalisman* Talisman, AActor* Target)
 	}
 
 	USceneComponent* AttachComponent = Target ? Target->GetRootComponent() : nullptr;
-
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 		Talisman->TalismanDataAsset->SkillInfo.ExecuteEffect,
 		AttachComponent,
@@ -61,6 +61,12 @@ void URangeAttack::Bomb(ATalisman* Talisman, AActor* Target)
 		EAttachLocation::SnapToTarget,
 		true
 	);
+
+	IDamageable* InterfaceRef = Cast<IDamageable>(Target);
+	if (InterfaceRef)
+	{
+		InterfaceRef->DealDamage(Talisman->TalismanDataAsset->SkillInfo.Damage, Talisman->TalismanDataAsset);
+	}
 
 	Talisman->Destroy();
 }
