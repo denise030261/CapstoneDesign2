@@ -231,4 +231,10 @@ private:
 	int SelectedAttackIndex = 0;
 
 	bool bAttackEnable();
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> DieWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* DieWidget;
 };
