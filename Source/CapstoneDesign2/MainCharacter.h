@@ -131,6 +131,9 @@ public:
 	// Force Feedback (GamePad)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GamePad")
 	UForceFeedbackEffect * ForceFeedback;
+
+	UPROPERTY(BlueprintReadOnly)
+	UTalismanDataAsset* SelectedTalismanDataAsset;
 	
 protected:
 
@@ -203,8 +206,6 @@ private:
 	void EnableMovement();
 
 	bool bNoDamage = false;
-
-	UTalismanDataAsset* SelectedTalismanDataAsset;
 
 	void AddNoDamage();
 

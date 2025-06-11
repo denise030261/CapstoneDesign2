@@ -11,6 +11,7 @@
 #include "Components/AudioComponent.h"
 #include "Sound/SoundCue.h"
 #include <Kismet/GameplayStatics.h>
+#include <CapstoneDesign2/MainCharacter.h>
 
 // Sets default values
 ATalisman::ATalisman()
@@ -41,7 +42,12 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 {
 	if (OtherActor == GetWorld()->GetFirstPlayerController()->GetCharacter() || OtherActor == this)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Contact Player"));
+		return;
+	}
+
+	if (TalismanDataAsset == nullptr)
+	{
+		// 아직 데이터가 준비되지 않았으므로 아무것도 하지 않고 즉시 함수를 종료합니다.
 		return;
 	}
 
@@ -78,7 +84,7 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			if (NormalSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), NormalSound, GetActorLocation());
-				UE_LOG(LogTemp, Log, TEXT("Played NormalSound at location: %s"), *NormalSound->GetName());
+				UE_LOG(LogTemp, Log, TEXT("Played NormalSound at location: %s, Other : %s"), *NormalSound->GetName(),*OtherActor->GetName());
 			}
 		}
 

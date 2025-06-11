@@ -365,17 +365,19 @@ bool AMainCharacter::bAttackEnable()
 void AMainCharacter::ThrowTalisman()
 {
 	FVector ForwardDirection = FRotationMatrix(ThrowRotation).GetUnitAxis(EAxis::X);
-	FVector ThrowLocation = GetActorLocation() + ForwardDirection * 25;
-	//ThrowRotation += FRotator(0, 90, 0);
+	FVector ThrowLocation = GetActorLocation() + ForwardDirection * 20;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	ATalisman* TalismanInstance = GetWorld()->SpawnActor<ATalisman>(Talisman, ThrowLocation, ThrowRotation, SpawnParams);
+	
+	ATalisman* TalismanInstance = GetWorld()->SpawnActor<ATalisman>(Talisman, ThrowLocation, ThrowRotation + FRotator(0, 90, 0), SpawnParams);
 
 	if (TalismanInstance == nullptr)
 		return;
 
-	TalismanInstance->TalismanDataAsset = SelectedTalismanDataAsset;
+	if (SelectedTalismanDataAsset != nullptr)
+		TalismanInstance->TalismanDataAsset = SelectedTalismanDataAsset;
+
 	TalismanInstance->SetMoveDistance(ThrowLocation + ForwardDirection * TalismanInstance->TalismanDataAsset->SkillInfo.Distance);
 
 	// Call SkillExecute Function
@@ -389,7 +391,6 @@ void AMainCharacter::ThrowTalisman()
 		if (Executor)
 		{
 			Executor->SkillExecute(TalismanInstance, GetWorld());  
-			//ThrowRotation -= FRotator(0, 90, 0);
 		}
 	}
 
@@ -450,7 +451,6 @@ void AMainCharacter::SetCharacterHP(int Num)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Damage"));
 	float Stun = 0;
 	DisableInput(PC);
 	if (HP <= 0)
@@ -498,8 +498,6 @@ void AMainCharacter::EnableMovement()
 	if (DamageLevel==2)
 	{
 		AnimInst->Montage_Play(GetupMontage);
-		//MontageEndDelegate.BindUObject(this, &AMainCharacter::OnAttackMontageEnded);
-		//AnimInst->Montage_SetEndDelegate(MontageEndDelegate, GetupMontage);
 		return;
 	} // Bigest Damage
 	else if (DamageLevel == 3)

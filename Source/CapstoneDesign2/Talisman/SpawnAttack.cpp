@@ -12,10 +12,11 @@ void USpawnAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (Owner && Owner->TalismanDataAsset && Owner->TalismanDataAsset->SkillInfo.SpawnSkill && World)
 	{
-		FVector SpawnLocation = Owner->GetActorLocation() + Owner->GetActorForwardVector() * Owner->TalismanDataAsset->SkillInfo.Distance;
-		FVector RightVecotr = Owner->GetActorRightVector();
-		FVector SpawnLeftLocation = SpawnLocation - RightVecotr * 300;
-		FVector SpawnRightLocation = SpawnLocation + RightVecotr * 300;
+		FVector ForwardDirection = FRotationMatrix(Owner->GetActorRotation()-FRotator(0,90,0)).GetUnitAxis(EAxis::X);
+		FVector SpawnLocation = Owner->GetActorLocation() + ForwardDirection * Owner->TalismanDataAsset->SkillInfo.Distance;
+		FVector RightVector = FRotationMatrix(Owner->GetActorRotation() - FRotator(0, 90, 0)).GetUnitAxis(EAxis::Y);
+		FVector SpawnLeftLocation = SpawnLocation - RightVector * 300;
+		FVector SpawnRightLocation = SpawnLocation + RightVector * 300;
 		ASpawnSkill* SpawnedActor = World->SpawnActor<ASpawnSkill>(
 			Owner->TalismanDataAsset->SkillInfo.SpawnSkill,
 			SpawnLocation,

@@ -465,6 +465,8 @@ void ABoss1::ShootNeedle()
 		for (int32 i = 0; i < Rots.Num(); i++)
 		{
 			ABoss1_Projectile_Needle* Needle = GetWorld()->SpawnActor<ABoss1_Projectile_Needle>(NeedleProjectile, GetActorLocation(), LookAt + FRotator(0.0f, Rots[i], 0.0f));
+			if (Needle == nullptr)
+				continue;
 			Needle->Damage = ShootNeeleDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
 			Needle->SetActorRelativeScale3D(Needle->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
 			Needle->RemovalSoundVolumeMultiplier = FMath::Pow(1.2f, -Rots.Num() + 1.0f);
