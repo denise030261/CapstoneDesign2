@@ -47,7 +47,6 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 
 	if (TalismanDataAsset == nullptr)
 	{
-		// 아직 데이터가 준비되지 않았으므로 아무것도 하지 않고 즉시 함수를 종료합니다.
 		return;
 	}
 
