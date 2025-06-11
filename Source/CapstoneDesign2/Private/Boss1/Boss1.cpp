@@ -632,28 +632,28 @@ void ABoss1::MeleeAttack()
 	ShockHandles.Add(ShockTimerHandle);
 	GetWorldTimerManager().SetTimer(ShockTimerHandle, [&, Rotation, StartLocation, Direction, i, WeakThis]() mutable
 	{
-		if (i > 10)
+		if (WeakThis.IsValid())
 		{
-			if (WeakThis.IsValid())
+			if (i > 10)
 			{
-				GetWorldTimerManager().ClearTimer(ShockTimerHandle);
-				ShockHandles.Remove(ShockTimerHandle);
+					GetWorldTimerManager().ClearTimer(ShockTimerHandle);
+					ShockHandles.Remove(ShockTimerHandle);
+				return;
 			}
-			return;
-		}
 
-		const FVector Location = StartLocation + Direction * 500.0f * i;
-		ABoss1_MeleeAttackShock* Shock = GetWorld()->SpawnActor<ABoss1_MeleeAttackShock>(MeleeAttackShock, Location, Rotation);
-		if (IsValid(Shock))
-		{
-			Shock->SetActorRelativeScale3D(Shock->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
-			Shock->Damage = MeleeAttackShockDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
-		}
-		i++;
+			const FVector Location = StartLocation + Direction * 500.0f * i;
+			ABoss1_MeleeAttackShock* Shock = GetWorld()->SpawnActor<ABoss1_MeleeAttackShock>(MeleeAttackShock, Location, Rotation);
+			if (IsValid(Shock))
+			{
+				Shock->SetActorRelativeScale3D(Shock->GetActorRelativeScale3D() * FMath::Pow(EatIronScaleFactor, NowIronCount));
+				Shock->Damage = MeleeAttackShockDamage * FMath::Pow(EatIronDamageFactor, NowIronCount);
+			}
+			i++;
 		
 #if WITH_EDITOR
-		DrawDebugSphere(GetWorld(), Shock->GetActorLocation(), Shock->CollisionComponent->GetScaledSphereRadius(), 12, FColor::Red, false, 1.5f);
+			DrawDebugSphere(GetWorld(), Shock->GetActorLocation(), Shock->CollisionComponent->GetScaledSphereRadius(), 12, FColor::Red, false, 1.5f);
 #endif
+		}
 	},
 	0.2f,
 	true,
