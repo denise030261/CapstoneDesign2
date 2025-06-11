@@ -516,6 +516,8 @@ void AMainCharacter::EnableMovement()
 
 			GetWorld()->GetFirstPlayerController()->SetInputMode(InputModeData);
 			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+
+			GetWorldSettings()->SetTimeDilation(0.f);
 		} 
 	} // Die
 
