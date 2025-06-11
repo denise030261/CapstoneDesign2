@@ -39,6 +39,13 @@ class CAPSTONEDESIGN2_API AMainCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
+	/** Run Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RunAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RunActionGamePad;
+	
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
@@ -143,6 +150,11 @@ protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
+	void StartSprint(const FInputActionValue& Value);
+	void EndSprint(const FInputActionValue& Value);
+	void ToggleSprint(const FInputActionValue& Value);
+	bool bIsSprinting = false;
+	
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 

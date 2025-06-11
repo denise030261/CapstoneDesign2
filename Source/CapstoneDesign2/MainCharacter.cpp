@@ -132,6 +132,11 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
 
+		// Run
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &AMainCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &AMainCharacter::EndSprint);
+		EnhancedInputComponent->BindAction(RunActionGamePad, ETriggerEvent::Started, this, &AMainCharacter::ToggleSprint);
+		
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 
@@ -143,7 +148,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(SpecialAttackAction, ETriggerEvent::Started, this, &AMainCharacter::SpecialAttack);
 		EnhancedInputComponent->BindAction(GodAttackAction, ETriggerEvent::Started, this, &AMainCharacter::GodAttack);
 	}
-
 }
 
 void AMainCharacter::Move(const FInputActionValue& Value)
@@ -153,6 +157,12 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
+		if (!(GetCharacterMovement()->Velocity.Size() > 3 && !GetCharacterMovement()->GetCurrentAcceleration().Equals(FVector::ZeroVector)))
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+			bIsSprinting = false;
+		}
+		
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -166,6 +176,41 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 		// add movement 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
+
+void AMainCharacter::StartSprint(const FInputActionValue& Value)
+{
+	if (Controller != nullptr)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+		bIsSprinting = true;
+	}
+}
+
+void AMainCharacter::EndSprint(const FInputActionValue& Value)
+{
+	if (Controller != nullptr)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+		bIsSprinting = false;
+	}
+}
+
+void AMainCharacter::ToggleSprint(const FInputActionValue& Value)
+{
+	if (Controller != nullptr)
+	{
+		if (bIsSprinting)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+			bIsSprinting = false;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+			bIsSprinting = true;
+		}
 	}
 }
 
