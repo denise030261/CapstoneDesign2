@@ -24,7 +24,7 @@ AActor* ACapstoneDesign2GameMode::ChoosePlayerStart_Implementation(AController* 
         }
     }
 
-    // ÅÂ±×¿¡ ¸Â´Â PlayerStart Ã£±â
+    // ï¿½Â±×¿ï¿½ ï¿½Â´ï¿½ PlayerStart Ã£ï¿½ï¿½
     TArray<AActor*> PlayerStarts;
     UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 
@@ -34,12 +34,13 @@ AActor* ACapstoneDesign2GameMode::ChoosePlayerStart_Implementation(AController* 
         {
             if (PS->PlayerStartTag == DesiredTag)
             {
+                UE_LOG(LogTemp, Warning, TEXT("%s"), *PS->GetName());
                 return PS;
             }
         }
     }
 
-    // ¸ø Ã£À¸¸é ±âº» À§Ä¡
+    // ï¿½ï¿½ Ã£ï¿½ï¿½ï¿½ï¿½ ï¿½âº» ï¿½ï¿½Ä¡
     return Super::ChoosePlayerStart_Implementation(Player);
 }
 
