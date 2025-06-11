@@ -42,6 +42,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property")
 	float NowHp;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GamePad")
+	UForceFeedbackEffect* HitForceFeedbackEffect;
 
 protected:
 	virtual void UpdateUI() const;

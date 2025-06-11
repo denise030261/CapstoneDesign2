@@ -130,8 +130,11 @@ public:
 
 	// Force Feedback (GamePad)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GamePad")
-	UForceFeedbackEffect * ForceFeedback;
+	UForceFeedbackEffect* HitForceFeedback;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GamePad")
+	UForceFeedbackEffect* SkillForceFeedback;
+	
 	UPROPERTY(BlueprintReadOnly)
 	UTalismanDataAsset* SelectedTalismanDataAsset;
 	

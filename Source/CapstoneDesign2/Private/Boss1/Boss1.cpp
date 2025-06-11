@@ -122,6 +122,9 @@ ABoss1::ABoss1()
 	
 	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> SoundForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/SoundForceFeedbackEffect.SoundForceFeedbackEffect'"));
 	if (SoundForceFeedbackEffectAsset.Succeeded()) SoundForceFeedbackEffect = SoundForceFeedbackEffectAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<UForceFeedbackEffect> HitForceFeedbackEffectAsset(TEXT("/Script/Engine.ForceFeedbackEffect'/Game/CapstoneDesign/Input/ForceFeedback/SkillHitForceFeedbackEffect.SkillHitForceFeedbackEffect'"));
+	if (HitForceFeedbackEffectAsset.Succeeded()) HitForceFeedbackEffect = HitForceFeedbackEffectAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -209,6 +212,7 @@ void ABoss1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
 	if (DataAsset && FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName() && (State != EBoss1_State::Spawn || State != EBoss1_State::Die))
 	{
+		UGameplayStatics::SpawnForceFeedbackAtLocation(this, HitForceFeedbackEffect, GetActorLocation());
 		if (Phase == 1 || IsHealPattern)
 		{
 			if (State == EBoss1_State::Tracing)
