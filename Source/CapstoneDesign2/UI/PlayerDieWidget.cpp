@@ -59,6 +59,9 @@ void UPlayerDieWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 void UPlayerDieWidget::GoToBossLevel()
 {
+	FInputModeGameOnly InputModeData;
+	GetWorld()->GetFirstPlayerController()->SetInputMode(InputModeData);
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 	UGameplayStatics::OpenLevel(this, FName("NewBoss"));
 }
 
