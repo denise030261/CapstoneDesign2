@@ -4,4 +4,11 @@
 #include "MyGameInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
 
+void UMyGameInstance::Init()
+{
+    Super::Init();
+    UE_LOG(LogTemp, Warning, TEXT("UMyGameInstance Init() called"));
+
+}

@@ -15,6 +15,9 @@ class CAPSTONEDESIGN2_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
+
+    virtual void Init() override;
+
     UPROPERTY(BlueprintReadWrite)
     FString PreviousMapName;
 
@@ -90,6 +93,16 @@ public:
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool PattenrnFire;
 
+    bool GetPattenrnFire() const { return PattenrnFire; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetPattenrnFire(bool b) { PattenrnFire = b; }
+
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
     bool PatternWind;
+
+    bool GetPatternWind() const { return PatternWind; }
+
+    UFUNCTION(BlueprintCallable)
+    void SetPatternWind(bool b) { PatternWind = b; }
 };
