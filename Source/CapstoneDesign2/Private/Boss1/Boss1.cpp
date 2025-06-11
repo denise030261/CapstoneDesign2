@@ -2,7 +2,7 @@
 
 
 #include "Boss1/Boss1.h"
-
+#include "Boss1GameState.h"
 #include "Boss1/Boss1Anim.h"
 #include "Boss1/Boss1_Iron.h"
 #include "Boss1/Boss1_IronGenerator.h"
@@ -151,8 +151,6 @@ void ABoss1::BeginPlay()
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnShootNeedleAimingEndNotify.AddDynamic(this, &ABoss1::ShootNeedle);
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnThrowMassAimingEndNotify.AddDynamic(this, &ABoss1::ThrowMass);
 	Cast<UBoss1Anim>(GetMesh()->GetAnimInstance())->OnEndOnceNotify.AddDynamic(this, &ABoss1::ShootNeedleEnd);
-
-	//SetPhase1();
 }
 
 void ABoss1::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -804,7 +802,13 @@ void ABoss1::SetDie()
 	GetWorldTimerManager().ClearTimer(CastingTimerHandle);
 	GetWorldTimerManager().ClearAllTimersForObject(IronGenerator);
 	GetCharacterMovement()->DisableMovement();
-	GetMesh()->GetAnimInstance()->Montage_Play(DieMontage);
+	if (ABoss1GameState* GS = Cast<ABoss1GameState>(GetWorld()->GetGameState()))
+	{
+		GS->CatchBoss();
+		Destroy();
+	}
+	//GetMesh()->GetAnimInstance()->Montage_Play(DieMontage);
+	
 }
 
 void ABoss1::InitGrow(const float StartScale, const float EndScale, const float TotalTime)

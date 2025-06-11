@@ -16,7 +16,7 @@ void ABoss1GameState::BeginPlay()
 	if (World==nullptr)
 		return;
 
-	ALevelSequenceActor* OutLevelSequenceActor = nullptr;  // LevelSequenceActor를 받을 변수 선언
+	ALevelSequenceActor* OutLevelSequenceActor = nullptr;  
 	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
 		World, LevelSequence, FMovieSceneSequencePlaybackSettings(), OutLevelSequenceActor);
 
@@ -35,9 +35,54 @@ void ABoss1GameState::BeginPlay()
 	}
 }
 
+void ABoss1GameState::CatchBoss()
+{
+    if (bDie)
+        return;
+
+    bDie = true;
+
+    UWorld* World = GetWorld();
+    if (World == nullptr)
+        return;
+
+    ALevelSequenceActor* OutLevelSequenceActor = nullptr;  
+    LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
+        World, EndLevelSequence, FMovieSceneSequencePlaybackSettings(), OutLevelSequenceActor);
+
+    if (LevelSequencePlayer)
+    {
+        if (World)
+        {
+            AllCharacterMove(World, false);
+        }
+        LevelSequencePlayer->OnFinished.AddDynamic(this, &ABoss1GameState::DoneBossScene);
+        LevelSequencePlayer->Play();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Unable to create level sequence player"));
+    }
+}
+
 void ABoss1GameState::DoneAppearScene()
 {
     AllCharacterMove(GetWorld(), true);
+}
+
+void ABoss1GameState::DoneBossScene()
+{
+    AllCharacterMove(GetWorld(), true);
+
+    for (int i = 0; i < Spawns.Num(); i++)
+    {
+        FActorSpawnParameters SpawnParams;
+        ACharacter* SpawnedActor = GetWorld()->SpawnActor<ACharacter>(
+            Spawns[i],
+            SpawnVectors[i],
+            SpawnRotators[i],
+            SpawnParams);
+    }
 }
 
 void ABoss1GameState::AllCharacterMove(UWorld* World, bool bMove)

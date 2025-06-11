@@ -20,6 +20,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	ULevelSequence* LevelSequence;
 
+	UPROPERTY(EditAnywhere)
+	ULevelSequence* EndLevelSequence;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<ACharacter>> Spawns;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> SpawnVectors;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FRotator> SpawnRotators;
+
+	UFUNCTION()
+	void CatchBoss();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -30,5 +45,10 @@ private:
 	void DoneAppearScene();
 
 	UFUNCTION()
+	void DoneBossScene();
+
+	UFUNCTION()
 	void AllCharacterMove(UWorld* World, bool bMove);
+
+	bool bDie = false;
 };

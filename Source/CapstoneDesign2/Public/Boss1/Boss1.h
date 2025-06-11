@@ -110,7 +110,7 @@ public:
 	AMainCharacter* PlayerCharacter;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property|Phase1", meta = (ClampMin = "0.0", Const))
-	float Phase1Second = 3.0f;
+	float Phase1Second = 60.0f;
 	
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Property|Phase1")
 	float Phase1RemainSecond = Phase1Second;
