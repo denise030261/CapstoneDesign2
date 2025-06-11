@@ -222,6 +222,18 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
 	USoundCue* HealStartSound;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	UAudioComponent* BgmComp;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundWave* Phase1Bgm;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundWave* Phase2Bgm;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundWave* Phase3Bgm;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Text")
 	UStringTable* QuestTextStringTable;

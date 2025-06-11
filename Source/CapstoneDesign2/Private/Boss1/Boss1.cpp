@@ -114,6 +114,19 @@ ABoss1::ABoss1()
 	static ConstructorHelpers::FObjectFinder<USoundCue> HealStartSoundAsset(TEXT("/Script/Engine.SoundCue'/Game/MonsterRoarsAndGrowls/cues/02_Ferocious_Roar_Cue.02_Ferocious_Roar_Cue'"));
 	if (HealStartSoundAsset.Succeeded()) HealStartSound = HealStartSoundAsset.Object;
 
+	BgmComp = CreateDefaultSubobject<UAudioComponent>(TEXT("BgmComp"));
+	BgmComp->SetAutoActivate(false);
+	BgmComp->SetupAttachment(RootComponent);
+	
+	static ConstructorHelpers::FObjectFinder<USoundWave> Phase1BgmAsset(TEXT("/Script/Engine.SoundWave'/Game/CapstoneDesign/Sounds/BossMap/bossPhase1.bossPhase1'"));
+	if (Phase1BgmAsset.Succeeded()) Phase1Bgm = Phase1BgmAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundWave> Phase2BgmAsset(TEXT("/Script/Engine.SoundWave'/Game/CapstoneDesign/Sounds/BossMap/bossPhase2.bossPhase2'"));
+	if (Phase2BgmAsset.Succeeded()) Phase2Bgm = Phase2BgmAsset.Object;
+	
+	static ConstructorHelpers::FObjectFinder<USoundWave> Phase3BgmAsset(TEXT("/Script/Engine.SoundWave'/Game/CapstoneDesign/Sounds/BossMap/bossPhase3.bossPhase3'"));
+	if (Phase3BgmAsset.Succeeded()) Phase3Bgm = Phase3BgmAsset.Object;
+
 	static ConstructorHelpers::FObjectFinder<UStringTable> QuestTextStringTableAsset(TEXT("/Script/Engine.StringTable'/Game/CapstoneDesign/Blueprints/Boss/Boss1/ST_Boss1QuestTexts.ST_Boss1QuestTexts'"));
 	if (QuestTextStringTableAsset.Succeeded()) QuestTextStringTable = QuestTextStringTableAsset.Object;
 	
@@ -709,6 +722,9 @@ void ABoss1::SetPhase1()
 	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("Phase1Start"));
+
+	BgmComp->SetSound(Phase1Bgm);
+	BgmComp->Play();
 }
 
 void ABoss1::SetPhase2()
@@ -742,6 +758,10 @@ void ABoss1::SetPhase2()
 	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("Phase2Start"));
+
+	BgmComp->Stop();
+	BgmComp->SetSound(Phase2Bgm);
+	BgmComp->Play();
 }
 
 void ABoss1::SetPhase3()
@@ -765,6 +785,10 @@ void ABoss1::SetPhase3()
 	UGameplayStatics::SpawnForceFeedbackAtLocation(this, GrowlForceFeedbackEffect, GetActorLocation());
 	
 	SetQuestStringFromStringTable(TEXT("Phase3Start"));
+	
+	BgmComp->Stop();
+	BgmComp->SetSound(Phase3Bgm);
+	BgmComp->Play();
 }
 
 void ABoss1::SetDie()
