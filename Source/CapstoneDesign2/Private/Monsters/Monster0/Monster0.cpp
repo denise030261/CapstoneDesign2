@@ -71,6 +71,11 @@ void AMonster0::BeginPlay()
 	Cast<UMonster0Anim>(GetMesh()->GetAnimInstance())->OnDieEndNotify.AddDynamic(this, &AMonster0::EndDie);
 }
 
+void AMonster0::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	GetWorldTimerManager().ClearTimer(AttackReadyHandle);
+}
+
 // Called every frame
 void AMonster0::Tick(float DeltaTime)
 {
