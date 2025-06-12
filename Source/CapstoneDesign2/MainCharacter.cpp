@@ -567,6 +567,7 @@ void AMainCharacter::EnableMovement()
 		DieWidget = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), DieWidgetClass);
 		if (DieWidget)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Go"));
 			DieWidget->AddToViewport();
 			FInputModeUIOnly InputModeData;
 			InputModeData.SetWidgetToFocus(DieWidget->TakeWidget());
