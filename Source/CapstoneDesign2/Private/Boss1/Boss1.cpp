@@ -36,6 +36,7 @@ ABoss1::ABoss1()
 	GetCapsuleComponent()->SetCapsuleRadius(60.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(FName("Boss1"));
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABoss1::OnOverlapBegin);
+	GetCapsuleComponent()->BodyInstance.bLockZTranslation = true;
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> Phase1MeshAsset(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonGrux/Characters/Heroes/Grux/Meshes/Grux.Grux'"));
 	if (Phase1MeshAsset.Succeeded()) Phase1Mesh = Phase1MeshAsset.Object;
