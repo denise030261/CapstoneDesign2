@@ -18,6 +18,7 @@
 #include "Components/AudioComponent.h"
 #include "Sound/SoundCue.h"
 #include "GameFramework/PlayerController.h"
+#include "System/MyGameInstance.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,6 +93,18 @@ void AMainCharacter::BeginPlay()
 		{
 			UIPlayerInstance->AddToViewport();
 			PC->SetInputMode(FInputModeGameOnly());
+		}
+	}
+	
+	if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetWorld()->GetGameInstance()))
+	{
+		if (GI->PattenrnFire)
+		{
+			CurAttribute = FName("Fire").ToString();
+		}
+		else
+		{
+			CurAttribute = FName("Normal").ToString();
 		}
 	}
 

@@ -125,7 +125,7 @@ public:
 	bool IsHealPattern = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Property|Phase2", meta = (ClampMin = "0.0", Const))
-	float HealSecond = 30.0f;
+	float HealSecond = 20.0f;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Property|Phase2")
 	float HealRemainSecond = HealSecond;

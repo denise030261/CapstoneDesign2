@@ -87,7 +87,7 @@ void AMonster1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAss
 	{
 		if (FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName())
 		{
-			DamageAmount *= 1.5f;
+			DamageAmount *= 2.0f;
 		}
 	
 		Super::DealDamage(DamageAmount, DataAsset);
