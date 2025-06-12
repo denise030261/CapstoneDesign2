@@ -51,4 +51,6 @@ private:
 	void AllCharacterMove(UWorld* World, bool bMove);
 
 	bool bDie = false;
+
+	void PlayAppearScene();
 };

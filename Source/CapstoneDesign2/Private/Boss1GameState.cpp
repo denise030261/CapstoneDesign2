@@ -12,27 +12,11 @@
 
 void ABoss1GameState::BeginPlay()
 {
-	UWorld* World = GetWorld();
-	if (World==nullptr)
-		return;
+    Super::BeginPlay();
 
-	ALevelSequenceActor* OutLevelSequenceActor = nullptr;  
-	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
-		World, LevelSequence, FMovieSceneSequencePlaybackSettings(), OutLevelSequenceActor);
-
-	if (LevelSequencePlayer)
-	{
-		if (World)
-		{
-			AllCharacterMove(World, false);
-		}
-		LevelSequencePlayer->OnFinished.AddDynamic(this, &ABoss1GameState::DoneAppearScene);
-		LevelSequencePlayer->Play();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Unable to create level sequence player"));
-	}
+    FTimerHandle InitTimerHandle;
+    float DelayInSeconds = 0.2f; 
+    GetWorld()->GetTimerManager().SetTimer(InitTimerHandle, this, &ABoss1GameState::PlayAppearScene, DelayInSeconds, false);
 }
 
 void ABoss1GameState::CatchBoss()
@@ -114,16 +98,44 @@ void ABoss1GameState::AllCharacterMove(UWorld* World, bool bMove)
 
     if (FoundActors.Num() > 0)
     {
-        ABoss1* Boss = Cast<ABoss1>(FoundActors[0]);
-        if (Boss)
+        for (int i = 0; i < FoundActors.Num(); i++)
         {
-            Boss->SetActorHiddenInGame(!bMove);
-            Boss->SetActorTickEnabled(bMove);
-            Boss->FootstepSoundComp->Stop();
+            ABoss1* Boss = Cast<ABoss1>(FoundActors[i]);
+            if (Boss)
+            {
+                Boss->SetActorHiddenInGame(!bMove);
+                Boss->SetActorTickEnabled(bMove);
+                Boss->FootstepSoundComp->Stop();
+            }
         }
     }
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("Not Boss"));
+    }
+}
+
+void ABoss1GameState::PlayAppearScene()
+{
+    UWorld* World = GetWorld();
+    if (World == nullptr)
+        return;
+
+    ALevelSequenceActor* OutLevelSequenceActor = nullptr;
+    LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
+        World, LevelSequence, FMovieSceneSequencePlaybackSettings(), OutLevelSequenceActor);
+
+    if (LevelSequencePlayer)
+    {
+        if (World)
+        {
+            AllCharacterMove(World, false);
+        }
+        LevelSequencePlayer->OnFinished.AddDynamic(this, &ABoss1GameState::DoneAppearScene);
+        LevelSequencePlayer->Play();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Unable to create level sequence player"));
     }
 }
