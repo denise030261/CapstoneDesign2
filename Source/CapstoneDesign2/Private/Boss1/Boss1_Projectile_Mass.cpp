@@ -27,8 +27,8 @@ ABoss1_Projectile_Mass::ABoss1_Projectile_Mass()
 
 	CoreCollider = CreateDefaultSubobject<USphereComponent>(FName("CoreCollider"));
 	CoreCollider->InitSphereRadius(1.0f);
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Mass::OnCoreBeginOverlap);
-	CollisionComponent->SetupAttachment(RootComponent);
+	CoreCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Mass::OnCoreBeginOverlap);
+	CoreCollider->SetupAttachment(RootComponent);
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMesh"));
 	MeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -100.0f));
