@@ -499,6 +499,12 @@ void AMainCharacter::Dancing()
 
 void AMainCharacter::SetCharacterHP(int Num)
 {
+	if (bNoDamage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Damage State"));
+		return;
+	}
+
 	HP += Num;
 
 	if (Num > 0)
@@ -507,22 +513,10 @@ void AMainCharacter::SetCharacterHP(int Num)
 		return;
 	}
 
-	if (bNoDamage)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Damage State"));
-		return;
-	}
-
 	float Stun = 0;
 	DisableInput(PC);
-	if (HP <= 0)
-	{
-		DamageLevel = 3;
-		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
-		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
-		Stun = 5.7; // Die Animation Time
-	}
-	else if (Num < 0 && Num >= DamageArea[0])
+
+	if (Num < 0 && Num >= DamageArea[0])
 	{
 		DamageLevel = 0;
 		Stun = 0.63;
@@ -537,6 +531,14 @@ void AMainCharacter::SetCharacterHP(int Num)
 		DamageLevel = 2;
 		Stun = 6;
 	} // Fall Down
+
+	if (HP <= 0)
+	{
+		DamageLevel = 3;
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+		Stun = 5.7; // Die Animation Time
+	}
 
 	if (DamageMontages[DamageLevel])
 	{
@@ -590,6 +592,7 @@ void AMainCharacter::AddNoDamage()
 {
 	FTimerDelegate NoDamageDelegate;
 
+	UE_LOG(LogTemp, Error, TEXT("AddNoDamage"));
 	NoDamageDelegate = FTimerDelegate::CreateLambda([this]()
 		{
 			UE_LOG(LogTemp, Error, TEXT("No Damage Time"));
