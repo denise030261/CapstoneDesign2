@@ -38,7 +38,7 @@ void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 
 void UGodSkill::DoneSkill()
 {
-    if (CachedWorld.IsValid()) // 저장된 월드 포인터가 유효한지 확인
+    if (CachedWorld.IsValid())
     {
         UWorld* World = CachedWorld.Get();
         AllCharacterMove(World, true);
@@ -57,6 +57,7 @@ void UGodSkill::AllCharacterMove(UWorld* World, bool bMove)
     AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(World, 0));
     if (Player && Player->GetCharacterMovement())
     {
+        UE_LOG(LogTemp, Warning, TEXT("Player"));
         if (bMove)
         {
             Player->GetCharacterMovement()->SetMovementMode(MOVE_Walking); // 움직임 활성화
@@ -79,18 +80,22 @@ void UGodSkill::AllCharacterMove(UWorld* World, bool bMove)
 
     if (FoundActors.Num() > 0)
     {
-        ABoss1* Boss = Cast<ABoss1>(FoundActors[0]);
-        if (Boss)
+        for (int i = 0; i < FoundActors.Num(); i++)
         {
-            Boss->SetActorHiddenInGame(!bMove);
-            Boss->SetActorEnableCollision(bMove);
-            Boss->SetActorTickEnabled(bMove);
-            Boss->FootstepSoundComp->Stop();
-
-            IDamageable* InterfaceRef = Cast<IDamageable>(Boss);
-            if (InterfaceRef && bMove)
+            ABoss1* Boss = Cast<ABoss1>(FoundActors[i]);
+            if (Boss)
             {
-                InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
+                UE_LOG(LogTemp, Warning, TEXT("Boss"));
+                Boss->SetActorHiddenInGame(!bMove);
+                Boss->SetActorEnableCollision(bMove);
+                Boss->SetActorTickEnabled(bMove);
+                Boss->FootstepSoundComp->Stop();
+
+                IDamageable* InterfaceRef = Cast<IDamageable>(Boss);
+                if (InterfaceRef && bMove)
+                {
+                    InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
+                }
             }
         }
     }

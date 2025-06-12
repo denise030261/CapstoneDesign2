@@ -798,6 +798,7 @@ void ABoss1::SetDie()
 	State = EBoss1_State::Die;
 	PatternState = EBoss1_Pattern_State::None;
 
+	UE_LOG(LogTemp, Warning, TEXT("Die"));
 	GetWorldTimerManager().ClearTimer(IdleTimerHandle);
 	GetWorldTimerManager().ClearTimer(CastingTimerHandle);
 	GetWorldTimerManager().ClearAllTimersForObject(IronGenerator);
