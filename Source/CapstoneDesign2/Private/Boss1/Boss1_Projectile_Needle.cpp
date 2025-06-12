@@ -23,12 +23,12 @@ ABoss1_Projectile_Needle::ABoss1_Projectile_Needle()
 	CollisionComponent = CreateDefaultSubobject<UBoxComponent>(FName("BoxCollider"));
 	CollisionComponent->SetBoxExtent(FVector(83.0f, 10.0f, 5.0f));
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CollisionComponent->SetRelativeScale3D(FVector(5.0f));
+	CollisionComponent->SetRelativeScale3D(FVector(1.0f));
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Needle::OnBeginOverlap);
 	RootComponent = CollisionComponent;
 
 	CoreCollider = CreateDefaultSubobject<USphereComponent>(FName("CoreCollider"));
-	CoreCollider->InitSphereRadius(1.0f);
+	CoreCollider->InitSphereRadius(5.0f);
 	CoreCollider->OnComponentBeginOverlap.AddDynamic(this, &ABoss1_Projectile_Needle::OnCoreBeginOverlap);
 	CoreCollider->SetupAttachment(RootComponent);
 	
