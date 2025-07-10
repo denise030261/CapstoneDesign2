@@ -231,7 +231,7 @@ void ABoss1::OnOverlapBegin_Weapon(UPrimitiveComponent* OverlappedComponent, AAc
 	
 void ABoss1::DealDamage(float DamageAmount, const UTalismanDataAsset* DataAsset)
 {
-	if (DataAsset && FName("FireAttribute") == DataAsset->SkillInfo.Attribute->GetName() && (State != EBoss1_State::Spawn || State != EBoss1_State::Die))
+	if (DataAsset && FName("BP_FireAttribute_C") == DataAsset->SkillInfo.Attribute->GetName() && (State != EBoss1_State::Spawn || State != EBoss1_State::Die))
 	{
 		UGameplayStatics::SpawnForceFeedbackAtLocation(this, HitForceFeedbackEffect, GetActorLocation());
 		if (Phase == 1 || IsHealPattern)

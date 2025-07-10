@@ -2,4 +2,12 @@
 
 
 #include "TalismanAttributeStrategy.h"
+#include <Kismet/GameplayStatics.h>
 
+void UTalismanAttributeStrategy::PlayHitSound(UWorld* World, FVector Location)
+{
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(World, HitSound, Location);
+	}
+}

@@ -13,6 +13,19 @@ void UMoveSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 	UE_LOG(LogTemp, Warning, TEXT("Move Skill"));
 }
 
+void UMoveSkill::HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman)
+{
+	ACharacter* Character = World->GetFirstPlayerController()->GetCharacter();
+	if (Character == nullptr)
+		return;
+
+	Character->SetActorLocation(Talisman->GetActorLocation());
+
+	if (UTalismanAttributeStrategy* AttributeCDO = Talisman->TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>())
+		if (UFireAttribute* FireAttributeCDO = Cast<UFireAttribute>(AttributeCDO))
+			FireDance(Talisman, World, Character);
+}
+
 void UMoveSkill::Moving(FVector TargetLocation, ACharacter* Character, ATalisman* Owner, UWorld* World)
 {
 	Character->SetActorLocation(TargetLocation);

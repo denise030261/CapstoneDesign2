@@ -36,6 +36,11 @@ void UGodSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 
 }
 
+void UGodSkill::HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman)
+{
+    ;
+}
+
 void UGodSkill::DoneSkill()
 {
     if (CachedWorld.IsValid())

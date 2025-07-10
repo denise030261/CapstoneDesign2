@@ -17,6 +17,8 @@ class CAPSTONEDESIGN2_API UMoveSkill : public UTalismanSkillStrategy
 public:
 	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
 
+	virtual void HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman) override;
+
 	UFUNCTION()
 	void Moving(FVector TargetLocation, ACharacter* Character, ATalisman* Owner, UWorld* World);
 

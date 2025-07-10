@@ -10,3 +10,8 @@ void UNormalAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 	UE_LOG(LogTemp, Warning, TEXT("Normal Attack"));
 }
 
+void UNormalAttack::HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman)
+{
+	;
+}
+

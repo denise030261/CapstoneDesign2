@@ -627,27 +627,29 @@ void AMainCharacter::HandleOnMontageNotifyComponent(FName NotifyName, const FBra
 		AddNoDamage();
 		return;
 	}
-
-	if (CameraShakeClass)
+	else if (NotifyName == "Combo")
 	{
-		GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
-	}
-	AttackComboIndex--;
-
-	if (AttackComboIndex < 0)
-	{
-		if (AnimInst)
+		if (CameraShakeClass)
 		{
-			bAttacking = false;
-			bSkillEffect = false;
-			AttackComboIndex = 0;
-			//SetActorRotation(ThrowRotation); // Origin Rotation
-			AnimInst->Montage_Stop(0.4f, AttackMontages[0]);
+			GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(CameraShakeClass);
+		}
+		AttackComboIndex--;
+
+		if (AttackComboIndex < 0)
+		{
+			if (AnimInst)
+			{
+				bAttacking = false;
+				bSkillEffect = false;
+				AttackComboIndex = 0;
+				AnimInst->Montage_Stop(0.4f, AttackMontages[0]);
+			}
 		}
 	}
-
-	if (NotifyName == "Spawn" && Talisman != nullptr)
+	else if (NotifyName == "Spawn" && Talisman != nullptr)
+	{
 		ThrowTalisman();
+	}
 }
 
 void AMainCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)

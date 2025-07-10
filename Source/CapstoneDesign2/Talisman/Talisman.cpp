@@ -50,6 +50,13 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		return;
 	}
 
+	if (OtherActor == nullptr)
+		return;
+
+	UWorld* World = GetWorld();
+	if (World == nullptr)
+		return;
+
 	SetActorTickEnabled(false); // Don't Tick
 	bool bTarget = false;
 	if (OtherActor && OtherActor->GetClass()->ImplementsInterface(UDamageable::StaticClass()))
@@ -62,48 +69,15 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		}
 	}
 
-	
 	if (TalismanDataAsset->SkillInfo.Skill)
 	{
-		TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision); // For No Call OverlapBegin()
+		TriggerVolume->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 
 		UTalismanSkillStrategy* SkillCDO = TalismanDataAsset->SkillInfo.Skill->GetDefaultObject<UTalismanSkillStrategy>();
 		UTalismanAttributeStrategy* AttributeCDO = TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>();
 
-		if (UFireAttribute* FireAttackCDO = Cast<UFireAttribute>(AttributeCDO))
-		{
-			if (FireSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, GetActorLocation());
-				UE_LOG(LogTemp, Log, TEXT("Played FireSound at location: %s"), *FireSound->GetName());
-			}
-		}
-		else if (UNormalAttribute* NormalAttackCDO = Cast<UNormalAttribute>(AttributeCDO))
-		{
-			if (NormalSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), NormalSound, GetActorLocation());
-				UE_LOG(LogTemp, Log, TEXT("Played NormalSound at location: %s, Other : %s"), *NormalSound->GetName(),*OtherActor->GetName());
-			}
-		}
-
-		if (URangeAttack* RangeAttackCDO = Cast<URangeAttack>(SkillCDO))
-		{
-			if (UFireAttribute* FireAttackCDO = Cast<UFireAttribute>(AttributeCDO))
-			{
-				RangeAttackCDO->BombAttack(GetWorld(), OtherActor, this);
-			}
-			else if (UNormalAttribute* NormalAttackCDO = Cast<UNormalAttribute>(AttributeCDO))
-			{
-				RangeAttackCDO->DuplicateAttack(GetWorld(), OtherActor, this);
-			}
-
-			return;
-		}
-		else if (UMoveSkill* MoveSKillCDO = Cast<UMoveSkill>(SkillCDO))
-		{
-			MoveSKillCDO->Moving(GetActorLocation(),GetWorld()->GetFirstPlayerController()->GetCharacter(),this, GetWorld());
-		}
+		AttributeCDO->PlayHitSound(World, OtherActor->GetActorLocation()); 
+		SkillCDO->HitExecute(GetWorld(), OtherActor, this);
 
 		if (bTarget)
 			AttributeCDO->Attack(GetWorld(), OtherActor, this);

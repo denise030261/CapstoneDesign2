@@ -48,3 +48,8 @@ void USpawnAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 		}
 	}
 }
+
+void USpawnAttack::HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman)
+{
+	;
+}

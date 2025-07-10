@@ -18,6 +18,8 @@ class CAPSTONEDESIGN2_API URangeAttack : public UTalismanSkillStrategy
 public:
 	virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) override;
 
+	virtual void HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman) override;
+
 	void BombAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman);
 
 	void DuplicateAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman);

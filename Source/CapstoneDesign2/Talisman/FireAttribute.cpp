@@ -3,6 +3,7 @@
 
 #include "FireAttribute.h"
 #include "Talisman.h"
+#include <Kismet/GameplayStatics.h>
 
 UFireAttribute::UFireAttribute()
 {
@@ -66,4 +67,5 @@ void UFireAttribute::Passive_Implementation(UWorld* World)
 {
 	;
 }
+
 

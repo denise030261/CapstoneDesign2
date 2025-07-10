@@ -6,6 +6,8 @@
 #include <NiagaraFunctionLibrary.h>
 #include "SpawnSkill.h"
 #include <Damageable.h>
+#include "FireAttribute.h"
+#include "NormalAttribute.h"
 
 void URangeAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 {
@@ -17,6 +19,23 @@ void URangeAttack::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 	Owner->SetActorTickEnabled(true);
 	Owner->bRangeAttack = true;
 	UE_LOG(LogTemp, Warning, TEXT("Range Attack"));
+}
+
+void URangeAttack::HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman)
+{
+	UTalismanAttributeStrategy* AttributeCDO = Talisman->TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>();
+
+	if (AttributeCDO == nullptr)
+		return;
+
+	if (UFireAttribute* FireAttackCDO = Cast<UFireAttribute>(AttributeCDO))
+	{
+		BombAttack(GetWorld(), OtherActor, Talisman);
+	}
+	else if (UNormalAttribute* NormalAttackCDO = Cast<UNormalAttribute>(AttributeCDO))
+	{
+		DuplicateAttack(GetWorld(), OtherActor, Talisman);
+	}
 }
 
 void URangeAttack::BombAttack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman)

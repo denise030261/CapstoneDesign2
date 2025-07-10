@@ -19,4 +19,8 @@ public:
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
     void SkillExecute(ATalisman* Owner, UWorld* World);
     virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) PURE_VIRTUAL(UTalismanSkillStrategy::SkillExecute, );
+
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
+    void HitExecute(UWorld* World, AActor* OtherActor, ATalisman* Talisman);
+    virtual void HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman) PURE_VIRTUAL(UTalismanSkillStrategy::HitExecute, );
 };

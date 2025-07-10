@@ -23,4 +23,11 @@ public:
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
     void Passive(UWorld* World);
     virtual void Passive_Implementation(UWorld* World) PURE_VIRTUAL(UTalismanAttributeStrategy::Passive, );
+
+    UFUNCTION(BlueprintCallable, Category = "Attribute")
+    void PlayHitSound(UWorld* World, FVector Location);
+
+protected:
+    UPROPERTY(EditAnywhere, Category = "Talisman")
+    USoundBase* HitSound;
 };

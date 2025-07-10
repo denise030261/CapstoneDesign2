@@ -12,3 +12,8 @@ void UPassiveSkill::SkillExecute_Implementation(ATalisman* Owner, UWorld* World)
 		AttributeCDO->Passive_Implementation(World);
 	}
 }
+
+void UPassiveSkill::HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman)
+{
+	;
+}
