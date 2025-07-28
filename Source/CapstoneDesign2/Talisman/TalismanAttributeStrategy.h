@@ -15,13 +15,10 @@ class CAPSTONEDESIGN2_API UTalismanAttributeStrategy : public UObject
     GENERATED_BODY()
 
 public:
-    // 공격 함수 (자식 클래스에서 구현)
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
-    void Attack(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman);
+    UFUNCTION()
     virtual void Attack_Implementation(UWorld* World, AActor* OtherActor, ATalisman* ThisTalisman) PURE_VIRTUAL(UTalismanAttributeStrategy::Attack, );
 
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
-    void Passive(UWorld* World);
+    UFUNCTION()
     virtual void Passive_Implementation(UWorld* World) PURE_VIRTUAL(UTalismanAttributeStrategy::Passive, );
 
     UFUNCTION(BlueprintCallable, Category = "Attribute")

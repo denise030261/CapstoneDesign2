@@ -311,7 +311,7 @@ void AMainCharacter::Attack()
 		if(TalismanObject->TalismanDataAsset->SkillInfo.Attribute)
 			if (UPassiveSkill* PassiveObjecet = Cast<UPassiveSkill>(TalismanObject->TalismanDataAsset->SkillInfo.Attribute))
 			{
-				PassiveObjecet->SkillExecute(TalismanObject, GetWorld());
+				PassiveObjecet->SkillExecute_Implementation(TalismanObject, GetWorld());
 			}
 
 		ThrowTalisman(); // Spawn Talisman
@@ -452,7 +452,7 @@ void AMainCharacter::ThrowTalisman()
 
 		if (Executor)
 		{
-			Executor->SkillExecute(TalismanInstance, GetWorld());  
+			Executor->SkillExecute_Implementation(TalismanInstance, GetWorld());
 		}
 	}
 

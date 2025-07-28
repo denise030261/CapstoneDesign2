@@ -71,6 +71,15 @@ void UGodSkill::AllCharacterMove(UWorld* World, bool bMove)
         {
             Player->GetCharacterMovement()->DisableMovement(); // 움직임 비활성화
         }
+
+        if (bMove)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Player Move"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Player Not Move"));
+        }
         Player->SetActorHiddenInGame(!bMove);
         Player->SetActorEnableCollision(bMove);
         Player->SetActorTickEnabled(bMove);
@@ -102,10 +111,14 @@ void UGodSkill::AllCharacterMove(UWorld* World, bool bMove)
                     InterfaceRef->DealDamage(TalismanDataAsset->SkillInfo.Damage, TalismanDataAsset);
                 }
             }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Not Boss Cast"));
+            }
         }
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("Not Boss"));
+        UE_LOG(LogTemp, Warning, TEXT("Not Boss Num"));
     }
 }

@@ -77,10 +77,10 @@ void ATalisman::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		UTalismanAttributeStrategy* AttributeCDO = TalismanDataAsset->SkillInfo.Attribute->GetDefaultObject<UTalismanAttributeStrategy>();
 
 		AttributeCDO->PlayHitSound(World, OtherActor->GetActorLocation()); 
-		SkillCDO->HitExecute(GetWorld(), OtherActor, this);
+		SkillCDO->HitExecute_Implementation(GetWorld(), OtherActor, this);
 
 		if (bTarget)
-			AttributeCDO->Attack(GetWorld(), OtherActor, this);
+			AttributeCDO->Attack_Implementation(GetWorld(), OtherActor, this);
 	}
 
 	Destroy();

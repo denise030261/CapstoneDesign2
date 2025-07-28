@@ -15,12 +15,11 @@ class CAPSTONEDESIGN2_API UTalismanSkillStrategy : public UObject
 	GENERATED_BODY()
 
 public:
-    // 스킬 함수 (자식 클래스에서 구현)
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
-    void SkillExecute(ATalisman* Owner, UWorld* World);
+    UFUNCTION()
     virtual void SkillExecute_Implementation(ATalisman* Owner, UWorld* World) PURE_VIRTUAL(UTalismanSkillStrategy::SkillExecute, );
+    // As soon as Attacked
 
-    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Attribute")
-    void HitExecute(UWorld* World, AActor* OtherActor, ATalisman* Talisman);
+    UFUNCTION()
     virtual void HitExecute_Implementation(UWorld* World, AActor* OtherActor, ATalisman* Talisman) PURE_VIRTUAL(UTalismanSkillStrategy::HitExecute, );
+    // As soon as Hited
 };
