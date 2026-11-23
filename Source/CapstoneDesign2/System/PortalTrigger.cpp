@@ -28,12 +28,12 @@ void APortalTrigger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
     bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (OtherActor && OtherActor->IsA<ACharacter>())  // ÇÃ·¹ÀÌ¾î¸¸ ¹İÀÀ
+    if (OtherActor && OtherActor->IsA<ACharacter>())  // í”Œë ˆì´ì–´ë§Œ ë°˜ì‘
     {
         if (UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance()))
         {
             GI->PreviousMapName = UGameplayStatics::GetCurrentLevelName(this, true);
-            UE_LOG(LogTemp, Warning, TEXT(" ÀúÀåµÈ ÀÌÀü ¸Ê ÀÌ¸§: %s"), *GI->PreviousMapName);
+            UE_LOG(LogTemp, Warning, TEXT(" ì €ì¥ëœ ì´ì „ ë§µ ì´ë¦„: %s"), *GI->PreviousMapName);
         }
 
         UGameplayStatics::OpenLevel(this, NextLevelName);

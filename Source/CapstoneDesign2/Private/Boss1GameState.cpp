@@ -115,27 +115,34 @@ void ABoss1GameState::AllCharacterMove(UWorld* World, bool bMove)
     }
 }
 
+bool ABoss1GameState::PrepareAppearSceneForLoading()
+{
+    if (bAppearScenePrepared)
+        return IsValid(LevelSequencePlayer);
+    UWorld* World = GetWorld();
+    if (!World || !LevelSequence)
+        return false;
+    ALevelSequenceActor* SequenceActor = nullptr;
+    LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
+        World, LevelSequence, FMovieSceneSequencePlaybackSettings(), SequenceActor);
+    if (!LevelSequencePlayer)
+        return false;
+    AllCharacterMove(World, false);
+    // AppearScene has no event tracks. Evaluate the opening pose while stopped;
+    // do not advance gameplay timers or start the cinematic audio.
+    LevelSequencePlayer->SetPlaybackPosition(FMovieSceneSequencePlaybackParams(
+        LevelSequencePlayer->GetStartTime().Time, EUpdatePositionMethod::Jump));
+    bAppearScenePrepared = true;
+    UE_LOG(LogTemp, Display, TEXT("Boss intro opening frame prepared at world time %.3f"), World->GetTimeSeconds());
+    return true;
+}
+
 void ABoss1GameState::PlayAppearScene()
 {
-    UWorld* World = GetWorld();
-    if (World == nullptr)
+    if (bAppearSceneStarted || !PrepareAppearSceneForLoading())
         return;
-
-    ALevelSequenceActor* OutLevelSequenceActor = nullptr;
-    LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
-        World, LevelSequence, FMovieSceneSequencePlaybackSettings(), OutLevelSequenceActor);
-
-    if (LevelSequencePlayer)
-    {
-        if (World)
-        {
-            AllCharacterMove(World, false);
-        }
-        LevelSequencePlayer->OnFinished.AddDynamic(this, &ABoss1GameState::DoneAppearScene);
-        LevelSequencePlayer->Play();
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Unable to create level sequence player"));
-    }
+    bAppearSceneStarted = true;
+    LevelSequencePlayer->OnFinished.AddDynamic(this, &ABoss1GameState::DoneAppearScene);
+    UE_LOG(LogTemp, Display, TEXT("Boss intro playback started at world time %.3f"), GetWorld()->GetTimeSeconds());
+    LevelSequencePlayer->Play();
 }

@@ -73,6 +73,8 @@ void ABoss1_Projectile_Needle::BeginPlay()
 
 void ABoss1_Projectile_Needle::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
+
 	if (EndPlayReason == EEndPlayReason::Destroyed)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(

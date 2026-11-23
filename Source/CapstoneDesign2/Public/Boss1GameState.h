@@ -35,11 +35,16 @@ public:
 	UFUNCTION()
 	void CatchBoss();
 
+	bool PrepareAppearSceneForLoading();
+
 protected:
 	virtual void BeginPlay() override;
 	
 private:
+	UPROPERTY(Transient)
 	ULevelSequencePlayer* LevelSequencePlayer;
+	bool bAppearScenePrepared = false;
+	bool bAppearSceneStarted = false;
 
 	UFUNCTION()
 	void DoneAppearScene();

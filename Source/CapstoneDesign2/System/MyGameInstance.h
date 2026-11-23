@@ -17,6 +17,22 @@ class CAPSTONEDESIGN2_API UMyGameInstance : public UGameInstance
 public:
 
     virtual void Init() override;
+    virtual void Shutdown() override;
+
+private:
+    void BeginResourceLoading(const FWorldContext& Context, const FString& MapName);
+    void FinishResourceLoading(UWorld* LoadedWorld);
+    void PreloadGameplayAssets();
+    void WarmupOpeningView(UWorld* LoadedWorld);
+
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<UObject>> ResidentGameplayAssets;
+
+    bool bGameplayAssetsLoaded = false;
+    bool bLoadingResources = false;
+    double LoadingStartedAt = 0.0;
+
+public:
 
     UPROPERTY(BlueprintReadWrite)
     FString PreviousMapName;

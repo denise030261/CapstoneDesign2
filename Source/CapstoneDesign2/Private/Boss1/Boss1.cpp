@@ -155,6 +155,8 @@ void ABoss1::BeginPlay()
 
 void ABoss1::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
+
 	GetWorldTimerManager().ClearTimer(IdleTimerHandle);
 	GetWorldTimerManager().ClearTimer(CastingTimerHandle);
 	GetWorldTimerManager().ClearAllTimersForObject(IronGenerator);
